@@ -1,0 +1,34 @@
+services:
+  - type: web
+    name: fleet-management-saas
+    runtime: docker
+    plan: starter
+    buildCommand: docker build -t fleet-management-saas .
+    startCommand: docker run -p 3000:3000 fleet-management-saas
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: fleet-management-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: fleet-management-redis
+          property: connectionString
+      - key: NEXTAUTH_URL
+        value: https://fleet-management-saas.onrender.com
+
+  - type: postgres
+    name: fleet-management-db
+    plan: free
+    databaseName: fleet_management
+    user: fleet_user
+
+  - type: redis
+    name: fleet-management-redis
+    plan: free
+    ipAllowList: []

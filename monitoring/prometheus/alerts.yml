@@ -1,0 +1,70 @@
+groups:
+  - name: fleet-alerts
+    interval: 30s
+    rules:
+      - alert: HighErrorRate
+        expr: |
+          (
+            sum(rate(http_requests_total{status=~"5.."}[5m]))
+            /
+            sum(rate(http_requests_total[5m]))
+          ) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High error rate on Fleet Management SaaS"
+          description: "Error rate is above 5% for more than 5 minutes."
+
+      - alert: HighLatency
+        expr: |
+          sum(rate(http_request_duration_seconds_sum[5m]))
+          /
+          sum(rate(http_request_duration_seconds_count[5m])) > 0.5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High average latency on Fleet Management SaaS"
+          description: "Average latency is above 500ms for more than 5 minutes."
+
+      - alert: DatabaseDown
+        expr: up{job="fleet_db"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Database exporter is down"
+          description: "Database scrape target has been down for more than 1 minute."
+
+      - alert: MemoryHigh
+        expr: process_memory_usage_bytes / process_memory_heap_total_bytes > 0.85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory usage"
+          description: "Process memory usage is above 85% for more than 5 minutes."
+
+      - alert: DiskHigh
+        expr: |
+          (
+            node_filesystem_size_bytes{job="fleet_app"} - node_filesystem_avail_bytes{job="fleet_app"}
+          )
+          /
+          node_filesystem_size_bytes{job="fleet_app"} > 0.80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High disk usage"
+          description: "Disk usage is above 80% for more than 5 minutes."
+
+      - alert: LowRequestRate
+        expr: sum(rate(http_requests_total[2m])) == 0
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Request rate dropped to zero"
+          description: "Request rate has been zero for 2 minutes — potential outage."

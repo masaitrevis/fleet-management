@@ -1,0 +1,13 @@
+import { NextRequest } from 'next/server';
+import { fuelCardController } from '@/modules/fuel-card/controllers/fuel-card.controller';
+import { withAuth } from '@/modules/auth/middleware/auth.middleware';
+import { requirePermission } from '@/modules/auth/middleware/rbac.middleware';
+
+export const GET = withAuth(
+  requirePermission('fuel:read')(
+    async (req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
+      const { id } = await params;
+      return fuelCardController.getTransactions(req, { params: { id } });
+    }
+  )
+);

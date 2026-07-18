@@ -1,0 +1,3989 @@
+// Fleet Management SaaS - Prisma Schema
+// Phase 2: Database Design
+// PostgreSQL 15+ with Prisma ORM 5.x
+// Multi-tenant, production-ready, scalable
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions", "typedSql"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  directUrl  = env("DIRECT_DATABASE_URL") // For migrations, bypass connection pooler
+  extensions = [pgcrypto]
+}
+
+// ============================================================================
+// ENUMS
+// ============================================================================
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  PENDING
+}
+
+enum CompanyStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  PENDING
+  TRIAL
+}
+
+enum VehicleStatus {
+  ACTIVE
+  IN_MAINTENANCE
+  RESERVED
+  OUT_OF_SERVICE
+  SOLD
+  SCRAPPED
+  STOLEN
+}
+
+enum VehicleAvailability {
+  AVAILABLE
+  ASSIGNED
+  RESERVED
+  MAINTENANCE
+  OFFLINE
+}
+
+enum DriverStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  TERMINATED
+  ON_LEAVE
+  PENDING
+}
+
+enum TripStatus {
+  PLANNED
+  SCHEDULED
+  ASSIGNED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  DELAYED
+  NO_SHOW
+}
+
+enum MaintenanceStatus {
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  OVERDUE
+  CANCELLED
+  DEFERRED
+  WAITING_PARTS
+  FAILED_INSPECTION
+}
+
+enum FuelType {
+  DIESEL
+  PETROL
+  PREMIUM_DIESEL
+  PREMIUM_PETROL
+  ELECTRIC
+  HYBRID
+  CNG
+  LPG
+  HYDROGEN
+  OTHER
+}
+
+enum FuelPaymentMethod {
+  CASH
+  CARD
+  FUEL_CARD
+  CREDIT
+  MOBILE_MONEY
+  BANK_TRANSFER
+  CHEQUE
+  OTHER
+}
+
+enum FuelCardStatus {
+  ACTIVE
+  INACTIVE
+  BLOCKED
+  EXPIRED
+  PENDING
+  CANCELLED
+}
+
+enum FuelLogStatus {
+  VERIFIED
+  PENDING
+  DISPUTED
+  REJECTED
+  APPROVED
+}
+
+enum FuelSupplierStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  BLACKLISTED
+}
+
+enum FuelStationStatus {
+  ACTIVE
+  INACTIVE
+  CLOSED
+  UNDER_MAINTENANCE
+}
+
+enum FuelFraudType {
+  DUPLICATE_ENTRY
+  ODOMETER_ROLLBACK
+  TANK_OVERFLOW
+  UNAUTHORIZED_VEHICLE
+  OFF_HOURS_REFUEL
+  GEOFENCE_VIOLATION
+  EXCESSIVE_FREQUENCY
+  MANIPULATED_DATA
+}
+
+enum FuelFraudStatus {
+  OPEN
+  INVESTIGATING
+  CONFIRMED
+  FALSE_POSITIVE
+  DISMISSED
+}
+
+enum FuelReceiptStatus {
+  UPLOADED
+  PROCESSING
+  VERIFIED
+  FAILED
+  MISSING
+}
+
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  PAID
+  OVERDUE
+  FAILED
+  PARTIAL
+  REFUNDED
+  DISPUTED
+}
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  VIEWED
+  PAID
+  OVERDUE
+  CANCELLED
+  PARTIAL
+}
+
+enum DocumentType {
+  REGISTRATION
+  INSURANCE
+  INSPECTION
+  LICENSE
+  CERTIFICATION
+  MEDICAL
+  TRAINING
+  PERMIT
+  PHOTO
+  CONTRACT
+  OTHER
+  LOGBOOK
+  ROAD_LICENSE
+  INSPECTION_CERTIFICATE
+  EMISSIONS_CERTIFICATE
+  IMPORT_DOCUMENTS
+  WARRANTY
+}
+
+enum NotificationType {
+  TRIP
+  MAINTENANCE
+  FUEL
+  SYSTEM
+  BILLING
+  ALERT
+  GEOFENCE
+  SAFETY
+  ASSIGNMENT
+  REMINDER
+}
+
+enum NotificationChannel {
+  IN_APP
+  EMAIL
+  SMS
+  PUSH
+  WEBHOOK
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  INACTIVE
+  TRIAL
+  TRIAL_EXPIRED
+  EXPIRED
+  CANCELLED
+  SUSPENDED
+  PAST_DUE
+}
+
+enum WebhookStatus {
+  ACTIVE
+  INACTIVE
+  FAILED
+  RETRYING
+  DISABLED
+}
+
+enum AuditAction {
+  CREATE
+  READ
+  UPDATE
+  DELETE
+  LOGIN
+  LOGOUT
+  EXPORT
+  IMPORT
+  APPROVE
+  REJECT
+  SHARE
+  ASSIGN
+  UNASSIGN
+  ACTIVATE
+  DEACTIVATE
+  ARCHIVE
+  RESTORE
+  VERIFY
+}
+
+enum ExpenseCategory {
+  FUEL
+  MAINTENANCE
+  TOLL
+  PARKING
+  INSURANCE
+  LICENSE
+  CLEANING
+  SUPPLIES
+  LODGING
+  MEALS
+  OTHER
+}
+
+enum ExpenseStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  REIMBURSED
+  BILLED
+}
+
+enum GeofenceType {
+  CIRCLE
+  POLYGON
+  POLYLINE
+}
+
+enum GeofenceAlertType {
+  ENTER
+  EXIT
+  BOTH
+  DWELL
+  SPEED
+}
+
+enum ShiftType {
+  DAY
+  NIGHT
+  SPLIT
+  WEEKEND
+  HOLIDAY
+  CUSTOM
+}
+
+enum AssignmentType {
+  PRIMARY
+  TEMPORARY
+  SUBSTITUTE
+  TRAINING
+}
+
+enum LicenseClass {
+  A
+  B
+  C
+  D
+  E
+  F
+  M
+  OTHER
+}
+
+enum LicenseType {
+  COMMERCIAL
+  NON_COMMERCIAL
+  LEARNER
+  PROVISIONAL
+  INTERNATIONAL
+}
+
+enum CoverageType {
+  LIABILITY
+  COLLISION
+  COMPREHENSIVE
+  UNINSURED
+  MEDICAL
+  CARGO
+  GENERAL
+  OTHER
+}
+
+enum InspectionResult {
+  PASS
+  FAIL
+  CONDITIONAL
+  PENDING
+  WAIVED
+}
+
+enum PaymentMethod {
+  CREDIT_CARD
+  DEBIT_CARD
+  BANK_TRANSFER
+  CASH
+  CHECK
+  MPESA
+  MOBILE_MONEY
+  PAYPAL
+  STRIPE
+  OTHER
+}
+
+enum BillingInterval {
+  MONTHLY
+  QUARTERLY
+  YEARLY
+}
+
+enum CostType {
+  LABOR
+  PARTS
+  FLUIDS
+  TAX
+  SHIPPING
+  OTHER
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  NON_BINARY
+  PREFER_NOT_TO_SAY
+  OTHER
+}
+
+enum MaritalStatus {
+  SINGLE
+  MARRIED
+  DIVORCED
+  WIDOWED
+  SEPARATED
+  OTHER
+}
+
+enum OdometerReadingType {
+  MANUAL
+  GPS
+  DEVICE
+  IMPORTED
+  ESTIMATED
+}
+
+enum TripStopStatus {
+  PENDING
+  ARRIVED
+  DEPARTED
+  SKIPPED
+  DELAYED
+  CANCELLED
+}
+
+enum RouteStopType {
+  PICKUP
+  DELIVERY
+  WAYPOINT
+  REST_STOP
+  FUEL_STOP
+  MAINTENANCE
+  OTHER
+}
+
+enum GPSDeviceStatus {
+  ACTIVE
+  INACTIVE
+  OFFLINE
+  SUSPENDED
+  DECOMMISSIONED
+}
+
+enum MaintenanceScheduleType {
+  TIME_BASED
+  MILEAGE_BASED
+  BOTH
+  CONDITION_BASED
+}
+
+enum MaintenanceJobType {
+  PREVENTIVE
+  CORRECTIVE
+  PREDICTIVE
+  EMERGENCY
+  RECALL
+  WARRANTY
+  INSPECTION
+  OVERHAUL
+  OTHER
+}
+
+enum MaintenancePriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+  CRITICAL
+}
+
+enum WorkOrderStatus {
+  DRAFT
+  PENDING_APPROVAL
+  APPROVED
+  ASSIGNED
+  IN_PROGRESS
+  WAITING_PARTS
+  ON_HOLD
+  COMPLETED
+  CANCELLED
+  FAILED_INSPECTION
+}
+
+enum ServiceTemplateType {
+  OIL_CHANGE
+  BRAKE_INSPECTION
+  TIRE_ROTATION
+  ENGINE_SERVICE
+  TRANSMISSION_SERVICE
+  COOLANT_FLUSH
+  MAJOR_SERVICE
+  ANNUAL_INSPECTION
+  BATTERY_CHECK
+  ALIGNMENT
+  CUSTOM
+}
+
+enum MechanicStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  ON_LEAVE
+  TERMINATED
+}
+
+enum DowntimeReason {
+  SCHEDULED_MAINTENANCE
+  UNPLANNED_REPAIR
+  ACCIDENT
+  WEATHER
+  PARTS_UNAVAILABLE
+  MECHANIC_UNAVAILABLE
+  EXTERNAL_SERVICE
+  OTHER
+}
+
+enum ChecklistItemStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  PASSED
+  FAILED
+  NA
+  SKIP
+}
+
+enum ReadingType {
+  ODOMETER
+  HOUR_METER
+  TRIP_METER
+}
+
+enum PartCategoryType {
+  ENGINE
+  TRANSMISSION
+  SUSPENSION
+  ELECTRICAL
+  TYRES
+  BRAKES
+  FILTERS
+  FLUIDS
+  BODY
+  INTERIOR
+  EXHAUST
+  COOLING
+  STEERING
+  DRIVELINE
+  ACCESSORIES
+  OTHER
+}
+
+enum InventoryValuationMethod {
+  FIFO
+  LIFO
+  WEIGHTED_AVERAGE
+}
+
+enum PartStatus {
+  ACTIVE
+  DISCONTINUED
+  OUT_OF_STOCK
+  LOW_STOCK
+  OBSOLETE
+  PENDING
+}
+
+enum StockMovementType {
+  PURCHASE
+  ISSUE
+  RETURN
+  ADJUSTMENT
+  TRANSFER
+  WRITE_OFF
+  MAINTENANCE_CONSUMPTION
+  RECONCILIATION
+}
+
+enum PurchaseOrderStatus {
+  DRAFT
+  SUBMITTED
+  PENDING_APPROVAL
+  APPROVED
+  ORDERED
+  PARTIALLY_RECEIVED
+  COMPLETED
+  CANCELLED
+  REJECTED
+}
+
+enum WarehouseTransferStatus {
+  DRAFT
+  PENDING_APPROVAL
+  APPROVED
+  IN_TRANSIT
+  RECEIVED
+  CANCELLED
+}
+
+enum ToolStatus {
+  AVAILABLE
+  IN_USE
+  MAINTENANCE
+  LOST
+  BROKEN
+  CALIBRATION_DUE
+  RETIRED
+}
+
+enum ToolCondition {
+  EXCELLENT
+  GOOD
+  FAIR
+  POOR
+  BROKEN
+}
+
+enum SupplierStatus {
+  ACTIVE
+  INACTIVE
+  PREFERRED
+  SUSPENDED
+  BLACKLISTED
+}
+
+enum InventoryAlertType {
+  LOW_STOCK
+  OUT_OF_STOCK
+  OVERSTOCK
+  WARRANTY_EXPIRY
+  CALIBRATION_DUE
+  SUPPLIER_DELAY
+  REORDER_LEVEL
+  PART_OBSOLETE
+}
+
+// ============================================================================
+// PLATFORM / TENANT
+// ============================================================================
+
+model Company {
+  id                    String        @id @default(uuid()) @db.Uuid
+  name                  String
+  slug                  String        @unique
+  email                 String
+  phone                 String?
+  website               String?
+  address               String?
+  address2              String?
+  city                  String?
+  state                 String?
+  country               String?       @default("KE")
+  postalCode            String?
+  timezone              String        @default("Africa/Nairobi")
+  currency              String        @default("KES")
+  logo                  String?
+  primaryColor          String?
+  secondaryColor        String?
+  status                CompanyStatus @default(PENDING)
+  settings              Json?         @default("{}")
+  metadata              Json?         @default("{}")
+  taxId                 String?
+  registrationNumber    String?
+  industry              String?
+  employeeCount         Int?
+  fleetSize             Int?          @default(0)
+  foundedDate           DateTime?
+  onboardingCompletedAt DateTime?
+  trialEndsAt           DateTime?
+  lastLoginAt           DateTime?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  // Relations
+  companyUsers             CompanyUser[]
+  roles                    Role[]
+  userRoles                UserRole[]
+  vehicleTypes             VehicleType[]
+  vehicleCategories        VehicleCategory[]
+  vehicles                 Vehicle[]
+  drivers                  Driver[]
+  trips                    Trip[]
+  routes                   Route[]
+  gpsDevices               GPSDevice[]
+  vehicleLocations         VehicleLocation[]
+  telemetryData            TelemetryData[]
+  geofences                Geofence[]
+  fuelLogs                 FuelLog[]
+  fuelStations             FuelStation[]
+  fuelSuppliers            FuelSupplier[]
+  fuelCards                FuelCard[]
+  fuelFraudAlerts          FuelFraudAlert[]
+  vehicleFuelStats         VehicleFuelStats[]
+  driverFuelStats          DriverFuelStats[]
+  fuelEfficiencyBenchmarks FuelEfficiencyBenchmark[]
+  odometerReadings         OdometerReading[]
+  maintenanceSchedules     MaintenanceSchedule[]
+  maintenanceRecords       MaintenanceRecord[]
+  serviceCenters           ServiceCenter[]
+  spareParts               SparePart[]
+  maintenanceCosts         MaintenanceCost[]
+  workOrders               WorkOrder[]
+  mechanics                Mechanic[]
+  serviceTemplates         ServiceTemplate[]
+  vehicleDowntimes         VehicleDowntime[]
+  maintenanceNotifications MaintenanceNotification[]
+  vehicleDocuments         VehicleDocument[]
+  driverDocuments          DriverDocument[]
+  driverCertifications     DriverCertification[]
+  driverMedicalRecords     DriverMedicalRecord[]
+  shifts                   Shift[]
+  operationalRules         OperationalRule[]
+  tripCargos               TripCargo[]
+  tripTimelines            TripTimeline[]
+  tripChecklists           TripChecklist[]
+  tripInspections          TripInspection[]
+  driverBehaviors          DriverBehavior[]
+  vehicleAlerts            VehicleAlert[]
+  insurances               Insurance[]
+  inspections              Inspection[]
+  customers                Customer[]
+  branches                 Branch[]
+  departments              Department[]
+  vehicleImages            VehicleImage[]
+  invoices                 Invoice[]
+  payments                 Payment[]
+  expenses                 Expense[]
+  notifications            Notification[]
+  notificationPreferences  NotificationPreference[]
+  auditLogs                AuditLog[]
+  activityLogs             ActivityLog[]
+  subscriptions            CompanySubscription[]
+  apiKeys                  APIKey[]
+  webhooks                 Webhook[]
+  stockMovements           StockMovement[]
+  purchaseOrders           PurchaseOrder[]
+
+  @@index([status])
+  @@index([slug])
+  @@index([createdAt])
+  @@index([deletedAt])
+  @@index([status, deletedAt])
+  @@map("companies")
+}
+
+model User {
+  id                  String     @id @default(uuid()) @db.Uuid
+  email               String     @unique
+  passwordHash        String
+  firstName           String
+  lastName            String
+  phone               String?
+  avatar              String?
+  status              UserStatus @default(PENDING)
+  emailVerifiedAt     DateTime?
+  phoneVerifiedAt     DateTime?
+  lastLoginAt         DateTime?
+  lastLoginIp         String?
+  failedLoginAttempts Int        @default(0)
+  lockedUntil         DateTime?
+  twoFactorEnabled    Boolean    @default(false)
+  twoFactorSecret     String?
+  locale              String     @default("en")
+  timezone            String     @default("Africa/Nairobi")
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  // Relations
+  refreshTokens           RefreshToken[]
+  sessions                Session[]
+  companyUsers            CompanyUser[]
+  userRoles               UserRole[]
+  drivers                 Driver[]
+  fleetVehicles           Vehicle[]                @relation(name: "FleetManager")
+  workOrderSupervisors    WorkOrder[]              @relation(name: "WorkOrderSupervisor")
+  notifications           Notification[]
+  notificationPreferences NotificationPreference[]
+  auditLogs               AuditLog[]
+  activityLogs            ActivityLog[]
+  apiKeys                 APIKey[]
+  managedWarehouses       Warehouse[]            @relation(name: "WarehouseManager")
+  performedStockMovements StockMovement[]        @relation(name: "StockMovementPerformer")
+  approvedPurchaseOrders  PurchaseOrder[]        @relation(name: "PurchaseOrderApprover")
+  requestedTransfers      WarehouseTransfer[]    @relation(name: "TransferRequester")
+  approvedTransfers       WarehouseTransfer[]    @relation(name: "TransferApprover")
+  receivedTransfers       WarehouseTransfer[]    @relation(name: "TransferReceiver")
+
+  @@index([email])
+  @@index([status])
+  @@index([createdAt])
+  @@index([deletedAt])
+  @@index([status, deletedAt])
+  @@map("users")
+}
+
+model CompanyUser {
+  id              String    @id @default(uuid()) @db.Uuid
+  userId          String    @db.Uuid
+  companyId       String    @db.Uuid
+  employeeId      String?
+  department      String?
+  jobTitle        String?
+  hireDate        DateTime?
+  terminationDate DateTime?
+  isActive        Boolean   @default(true)
+  isOwner         Boolean   @default(false)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, companyId])
+  @@index([companyId])
+  @@index([companyId, isActive])
+  @@index([companyId, deletedAt])
+  @@index([userId, deletedAt])
+  @@map("company_users")
+}
+
+model Role {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String
+  description String?
+  isSystem    Boolean  @default(false)
+  isDefault   Boolean  @default(false)
+  companyId   String?  @db.Uuid
+  permissions String[] // Array of permission codes
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  company   Company?   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  userRoles UserRole[]
+
+  @@unique([name, companyId])
+  @@index([companyId])
+  @@index([companyId, isSystem])
+  @@index([companyId, deletedAt])
+  @@map("roles")
+}
+
+model Permission {
+  id          String  @id @default(uuid()) @db.Uuid
+  code        String  @unique
+  name        String
+  description String?
+  module      String
+  category    String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([module])
+  @@index([code, module])
+  @@map("permissions")
+}
+
+model UserRole {
+  id         String   @id @default(uuid()) @db.Uuid
+  userId     String   @db.Uuid
+  roleId     String   @db.Uuid
+  companyId  String   @db.Uuid
+  assignedBy String?  @db.Uuid
+  assignedAt DateTime @default(now())
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role    Role    @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, roleId, companyId])
+  @@index([companyId])
+  @@index([companyId, userId])
+  @@index([companyId, roleId])
+  @@index([userId])
+  @@map("user_roles")
+}
+
+model Session {
+  id           String   @id @default(uuid()) @db.Uuid
+  userId       String   @db.Uuid
+  token        String   @unique
+  ipAddress    String?
+  userAgent    String?
+  expiresAt    DateTime
+  lastActiveAt DateTime @default(now())
+  companyId    String?  @db.Uuid // Context: which company the user was viewing
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+  @@index([expiresAt])
+  @@index([userId, expiresAt])
+  @@index([createdAt])
+  @@map("sessions")
+}
+
+model RefreshToken {
+  id         String    @id @default(uuid()) @db.Uuid
+  userId     String    @db.Uuid
+  tokenHash  String    @unique
+  expiresAt  DateTime
+  revokedAt  DateTime?
+  replacedBy String?   @db.Uuid
+  ipAddress  String?
+  userAgent  String?
+  companyId  String?   @db.Uuid
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([tokenHash])
+  @@index([expiresAt])
+  @@index([userId, expiresAt])
+  @@index([revokedAt])
+  @@map("refresh_tokens")
+}
+
+// ============================================================================
+// FLEET
+// ============================================================================
+
+model VehicleCategory {
+  id          String  @id @default(uuid()) @db.Uuid
+  companyId   String  @db.Uuid
+  name        String
+  description String?
+  icon        String?
+  color       String?
+  sortOrder   Int     @default(0)
+  isActive    Boolean @default(true)
+  isCustom    Boolean @default(true)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  company                  Company                   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  vehicleTypes             VehicleType[]
+  vehicles                 Vehicle[]
+  fuelEfficiencyBenchmarks FuelEfficiencyBenchmark[]
+
+  @@unique([companyId, name])
+  @@index([companyId])
+  @@index([companyId, sortOrder])
+  @@index([companyId, isActive])
+  @@index([companyId, deletedAt])
+  @@map("vehicle_categories")
+}
+
+model VehicleType {
+  id             String    @id @default(uuid()) @db.Uuid
+  companyId      String    @db.Uuid
+  categoryId     String?   @db.Uuid
+  name           String
+  description    String?
+  make           String?
+  model          String?
+  yearFrom       Int?
+  yearTo         Int?
+  capacity       Int? // Passengers
+  loadCapacity   Float? // kg or tons
+  fuelType       FuelType?
+  fuelEfficiency Float? // km/L or mpg
+  isActive       Boolean   @default(true)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  company  Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  category VehicleCategory? @relation(fields: [categoryId], references: [id])
+  vehicles Vehicle[]
+
+  @@unique([companyId, name])
+  @@index([companyId])
+  @@index([companyId, categoryId])
+  @@index([companyId, isActive])
+  @@index([companyId, deletedAt])
+  @@map("vehicle_types")
+}
+
+model Vehicle {
+  id                 String              @id @default(uuid()) @db.Uuid
+  companyId          String              @db.Uuid
+  typeId             String?             @db.Uuid
+  categoryId         String?             @db.Uuid
+  registrationNumber String
+  plateNumber        String?             @unique
+  vin                String?
+  make               String
+  model              String
+  trim               String?
+  year               Int?
+  color              String?
+  category           String?
+  fuelType           FuelType?
+  fuelCapacity       Float? // Liters
+  fuelTankCapacity   Float? // Liters
+  transmission       String?
+  engineCapacity     Float? // cc
+  horsepower         Float?
+  torque             Float? // Nm
+  seatingCapacity    Int?
+  payloadCapacity    Float? // kg
+  grossWeight        Float? // kg
+  axles              Int?
+  tyreSize           String?
+  currentOdometer    Float               @default(0) // km
+  odometer           Float?              @default(0) // km
+  engineHours        Float?              @default(0)
+  status             VehicleStatus       @default(ACTIVE)
+  availability       VehicleAvailability @default(AVAILABLE)
+  gpsDeviceId        String?             @db.Uuid
+  purchaseDate       DateTime?
+  purchasePrice      Float?
+  currentValue       Float?
+  currentDriverId    String?             @db.Uuid
+  branchId           String?             @db.Uuid
+  departmentId       String?             @db.Uuid
+  fleetManagerId     String?             @db.Uuid
+  photo              String?
+  photos             String[] // Array of photo URLs
+  notes              String?
+  engineNumber       String?
+  chassisNumber      String?
+  licensePlate       String?
+  licensePlateExpiry DateTime?
+  weight             Float? // kg
+  dimensions         Json? // { length, width, height }
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  company              Company               @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  type                 VehicleType?          @relation(fields: [typeId], references: [id])
+  vehicleCategory      VehicleCategory?      @relation(fields: [categoryId], references: [id])
+  gpsDevice            GPSDevice?            @relation(fields: [gpsDeviceId], references: [id])
+  currentDriver        Driver?               @relation(fields: [currentDriverId], references: [id])
+  branch               Branch?               @relation(fields: [branchId], references: [id])
+  department           Department?           @relation(fields: [departmentId], references: [id])
+  fleetManager         User?                 @relation(fields: [fleetManagerId], references: [id], name: "FleetManager")
+  images               VehicleImage[]
+  assignments          VehicleAssignment[]
+  trips                Trip[]
+  fuelLogs             FuelLog[]
+  fuelCard             FuelCard[]
+  fuelFraudAlerts      FuelFraudAlert[]
+  vehicleFuelStats     VehicleFuelStats[]
+  odometerReadings     OdometerReading[]
+  maintenanceSchedules MaintenanceSchedule[]
+  maintenanceRecords   MaintenanceRecord[]
+  vehicleDocuments     VehicleDocument[]
+  insurances           Insurance[]
+  inspections          Inspection[]
+  vehicleLocations     VehicleLocation[]
+  geofenceAlerts       GeofenceAlert[]
+  telemetryData        TelemetryData[]
+  driverBehaviors      DriverBehavior[]
+  vehicleAlerts        VehicleAlert[]
+  workOrders           WorkOrder[]
+  vehicleDowntimes     VehicleDowntime[]
+
+  @@unique([companyId, registrationNumber])
+  @@unique([companyId, vin])
+  @@unique([companyId, licensePlate])
+  @@index([companyId])
+  @@index([companyId, status])
+  @@index([companyId, currentDriverId])
+  @@index([companyId, typeId])
+  @@index([companyId, categoryId])
+  @@index([companyId, branchId])
+  @@index([companyId, departmentId])
+  @@index([companyId, fleetManagerId])
+  @@index([companyId, availability])
+  @@index([companyId, deletedAt])
+  @@index([companyId, status, deletedAt])
+  @@index([gpsDeviceId])
+  @@index([vin])
+  @@index([licensePlate])
+  @@index([plateNumber])
+  @@index([deletedAt])
+  @@map("vehicles")
+}
+
+model Branch {
+  id         String    @id @default(uuid()) @db.Uuid
+  companyId  String    @db.Uuid
+  name       String
+  address    String?
+  city       String?
+  state      String?
+  country    String?
+  postalCode String?
+  phone      String?
+  email      String?
+  isActive   Boolean   @default(true)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  deletedAt  DateTime?
+
+  company          Company             @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  vehicles         Vehicle[]
+  assignments      VehicleAssignment[]
+  operationalRules OperationalRule[]
+
+  @@index([companyId])
+  @@index([companyId, isActive])
+  @@index([companyId, deletedAt])
+  @@map("branches")
+}
+
+model Department {
+  id          String    @id @default(uuid()) @db.Uuid
+  companyId   String    @db.Uuid
+  name        String
+  description String?
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  company     Company             @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  vehicles    Vehicle[]
+  assignments VehicleAssignment[]
+
+  @@index([companyId])
+  @@index([companyId, isActive])
+  @@index([companyId, deletedAt])
+  @@map("departments")
+}
+
+model Driver {
+  id               String         @id @default(uuid()) @db.Uuid
+  companyId        String         @db.Uuid
+  userId           String?        @db.Uuid
+  employeeId       String?
+  firstName        String
+  lastName         String
+  email            String?
+  phone            String
+  phone2           String?
+  emergencyContact String?
+  emergencyPhone   String?
+  dateOfBirth      DateTime?
+  gender           Gender?
+  maritalStatus    MaritalStatus?
+  nationality      String?
+  idNumber         String? // National ID / Passport
+  hireDate         DateTime?
+  terminationDate  DateTime?
+  status           DriverStatus   @default(PENDING)
+  rating           Float          @default(0)
+  totalTrips       Int            @default(0)
+  totalDistance    Float          @default(0) // km
+  photo            String?
+  address          String?
+  city             String?
+  state            String?
+  country          String?
+  postalCode       String?
+  notes            String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  company              Company               @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  user                 User?                 @relation(fields: [userId], references: [id])
+  licenses             DriverLicense[]
+  assignments          VehicleAssignment[]
+  trips                Trip[]
+  fuelLogs             FuelLog[]
+  fuelCards            FuelCard[]
+  fuelFraudAlerts      FuelFraudAlert[]
+  driverFuelStats      DriverFuelStats[]
+  odometerReadings     OdometerReading[]
+  driverDocuments      DriverDocument[]
+  currentVehicles      Vehicle[]
+  driverCertifications DriverCertification[]
+  driverMedicalRecords DriverMedicalRecord[]
+  notifications        Notification[]
+  activityLogs         ActivityLog[]
+  geofenceAlerts       GeofenceAlert[]
+  telemetryData        TelemetryData[]
+  driverBehaviors      DriverBehavior[]
+  vehicleAlerts        VehicleAlert[]
+
+  @@unique([companyId, email])
+  @@unique([companyId, employeeId])
+  @@unique([companyId, idNumber])
+  @@index([companyId])
+  @@index([companyId, status])
+  @@index([companyId, userId])
+  @@index([companyId, deletedAt])
+  @@index([companyId, status, deletedAt])
+  @@index([userId])
+  @@index([deletedAt])
+  @@map("drivers")
+}
+
+model DriverLicense {
+  id               String       @id @default(uuid()) @db.Uuid
+  driverId         String       @db.Uuid
+  licenseType      LicenseType  @default(COMMERCIAL)
+  licenseClass     LicenseClass @default(C)
+  licenseNumber    String
+  issueDate        DateTime?
+  expiryDate       DateTime?
+  issuingAuthority String?
+  country          String?
+  state            String?
+  documentUrl      String?
+  isVerified       Boolean      @default(false)
+  verifiedAt       DateTime?
+  notes            String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  driver Driver @relation(fields: [driverId], references: [id], onDelete: Cascade)
+
+  @@index([driverId])
+  @@index([driverId, expiryDate])
+  @@index([driverId, licenseClass])
+  @@index([deletedAt])
+  @@map("driver_licenses")
+}
+
+model VehicleAssignment {
+  id             String         @id @default(uuid()) @db.Uuid
+  companyId      String         @db.Uuid
+  vehicleId      String         @db.Uuid
+  driverId       String         @db.Uuid
+  branchId       String?        @db.Uuid
+  departmentId   String?        @db.Uuid
+  assignmentType AssignmentType @default(PRIMARY)
+  assignedAt     DateTime       @default(now())
+  endedAt        DateTime?
+  assignedBy     String?        @db.Uuid
+  endedBy        String?        @db.Uuid
+  notes          String?
+  isPrimary      Boolean        @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  vehicle    Vehicle     @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  driver     Driver      @relation(fields: [driverId], references: [id], onDelete: Cascade)
+  branch     Branch?     @relation(fields: [branchId], references: [id])
+  department Department? @relation(fields: [departmentId], references: [id])
+
+  @@index([companyId])
+  @@index([vehicleId])
+  @@index([driverId])
+  @@index([companyId, vehicleId, assignedAt])
+  @@index([companyId, driverId, assignedAt])
+  @@index([vehicleId, assignedAt])
+  @@index([driverId, assignedAt])
+  @@index([assignedAt])
+  @@map("vehicle_assignments")
+}
+
+model Shift {
+  id           String    @id @default(uuid()) @db.Uuid
+  companyId    String    @db.Uuid
+  name         String
+  shiftType    ShiftType @default(DAY)
+  startTime    String
+  endTime      String
+  breakMinutes Int       @default(30)
+  daysOfWeek   Int[]
+  isActive     Boolean   @default(true)
+  notes        String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+  @@index([companyId, isActive])
+  @@index([companyId, shiftType])
+  @@index([deletedAt])
+  @@map("shifts")
+}
+
+model OperationalRule {
+  id          String  @id @default(uuid()) @db.Uuid
+  companyId   String  @db.Uuid
+  ruleType    String
+  ruleValue   Float
+  ruleUnit    String
+  isActive    Boolean @default(true)
+  appliesTo   String
+  branchId    String? @db.Uuid
+  description String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  branch  Branch? @relation(fields: [branchId], references: [id])
+
+  @@index([companyId])
+  @@index([companyId, ruleType])
+  @@index([companyId, isActive])
+  @@index([deletedAt])
+  @@map("operational_rules")
+}
+
+// ============================================================================
+// OPERATIONS
+// ============================================================================
+
+model VehicleImage {
+  id         String   @id @default(uuid()) @db.Uuid
+  companyId  String   @db.Uuid
+  vehicleId  String   @db.Uuid
+  url        String
+  thumbnail  String?
+  isPrimary  Boolean  @default(false)
+  uploadedBy String?  @db.Uuid
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  vehicle Vehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+  @@index([vehicleId])
+  @@index([vehicleId, isPrimary])
+  @@map("vehicle_images")
+}
+
+model GPSDevice {
+  id              String          @id @default(uuid()) @db.Uuid
+  companyId       String          @db.Uuid
+  deviceId        String          @unique // External device ID
+  serialNumber    String?
+  imei            String?         @unique
+  simNumber       String?
+  simProvider     String?
+  manufacturer    String?
+  model           String?
+  firmwareVersion String?
+  lastSeenAt      DateTime?
+  lastLocationAt  DateTime?
+  status          GPSDeviceStatus @default(ACTIVE)
+  batteryLevel    Float? // 0-100
+  signalStrength  Float? // 0-100
+  networkType     String? // 2G, 3G, 4G, LTE
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  company          Company           @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  vehicle          Vehicle[]
+  vehicleLocations VehicleLocation[]
+  telemetryData    TelemetryData[]
+
+  @@index([companyId])
+  @@index([companyId, status])
+  @@index([companyId, deletedAt])
+  @@index([imei])
+  @@index([deviceId])
+  @@index([deletedAt])
+  @@map("gps_devices")
+}
+
+model VehicleLocation {
+  id           String   @id @default(uuid()) @db.Uuid
+  companyId    String   @db.Uuid
+  vehicleId    String   @db.Uuid
+  deviceId     String?  @db.Uuid
+  latitude     Float
+  longitude    Float
+  altitude     Float?
+  speed        Float? // km/h
+  heading      Float? // degrees
+  accuracy     Float? // meters
+  batteryLevel Float?
+  ignition     Boolean?
+  address      String?
+  country      String?
+  state        String?
+  city         String?
+  postalCode   String?
+  street       String?
+  timestamp    DateTime
+
+  createdAt DateTime @default(now())
+
+  company Company    @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  vehicle Vehicle    @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  device  GPSDevice? @relation(fields: [deviceId], references: [id])
+
+  @@index([companyId])
+  @@index([vehicleId])
+  @@index([companyId, vehicleId, timestamp])
+  @@index([companyId, vehicleId])
+  @@index([timestamp])
+  @@index([latitude, longitude])
+  @@index([deviceId])
+  @@map("vehicle_locations")
+}
+
+model Route {
+  id                String  @id @default(uuid()) @db.Uuid
+  companyId         String  @db.Uuid
+  name              String
+  description       String?
+  startLocation     String
+  endLocation       String
+  startLat          Float?
+  startLng          Float?
+  endLat            Float?
+  endLng            Float?
+  distance          Float? // km
+  estimatedDuration Int? // minutes
+  isActive          Boolean @default(true)
+  isOptimized       Boolean @default(false)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  company    Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  routeStops RouteStop[]
+  waypoints  Waypoint[]
+  trips      Trip[]
+
+  @@index([companyId])
+  @@index([companyId, isActive])
+  @@index([companyId, deletedAt])
+  @@index([companyId, isActive, deletedAt])
+  @@index([deletedAt])
+  @@map("routes")
+}
+
+model RouteStop {
+  id                String        @id @default(uuid()) @db.Uuid
+  routeId           String        @db.Uuid
+  name              String
+  address           String
+  latitude          Float
+  longitude         Float
+  stopOrder         Int
+  estimatedWaitTime Int? // minutes
+  stopType          RouteStopType @default(WAYPOINT)
+  isActive          Boolean       @default(true)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  route     Route      @relation(fields: [routeId], references: [id], onDelete: Cascade)
+  tripStops TripStop[]
+
+  @@index([routeId])
+  @@index([routeId, stopOrder])
+  @@index([routeId, isActive])
+  @@index([deletedAt])
+  @@map("route_stops")
+}
+
+model Waypoint {
+  id        String @id @default(uuid()) @db.Uuid
+  routeId   String @db.Uuid
+  latitude  Float
+  longitude Float
+  order     Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  route Route @relation(fields: [routeId], references: [id], onDelete: Cascade)
+
+  @@index([routeId])
+  @@index([routeId, order])
+  @@map("waypoints")
+}
+
+model Trip {
+  id                 String     @id @default(uuid()) @db.Uuid
+  companyId          String     @db.Uuid
+  vehicleId          String     @db.Uuid
+  driverId           String     @db.Uuid
+  routeId            String?    @db.Uuid
+  customerId         String?    @db.Uuid
+  status             TripStatus @default(PLANNED)
+  tripNumber         String?
+  title              String?
+  description        String?
+  startTime          DateTime?
+  actualStartTime    DateTime?
+  estimatedEndTime   DateTime?
+  actualEndTime      DateTime?
+  startOdometer      Float?
+  endOdometer        Float?
+  distance           Float? // km
+  estimatedDistance  Float? // km
+  fuelCost           Float?
+  totalCost          Float?
+  notes              String?
+  cancellationReason String?
+  cancelledAt        DateTime?
+  cancelledBy        String?    @db.Uuid
+  priority           String?    @default("NORMAL") // LOW, NORMAL, HIGH, URGENT
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  company          Company           @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  vehicle          Vehicle           @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  driver           Driver            @relation(fields: [driverId], references: [id], onDelete: Cascade)
+  route            Route?            @relation(fields: [routeId], references: [id])
+  customer         Customer?         @relation(fields: [customerId], references: [id])
+  tripStops        TripStop[]
+  tripCargos       TripCargo[]
+  tripTimelines    TripTimeline[]
+  tripChecklists   TripChecklist[]
+  tripInspections  TripInspection[]
+  fuelLogs         FuelLog[]
+  odometerReadings OdometerReading[]
+  expenses         Expense[]
+  telemetryData    TelemetryData[]
+
+  @@unique([companyId, tripNumber])
+  @@index([companyId])
+  @@index([companyId, status])
+  @@index([companyId, vehicleId])
+  @@index([companyId, driverId])
+  @@index([companyId, customerId])
+  @@index([companyId, startTime])
+  @@index([companyId, status, startTime])
+  @@index([companyId, deletedAt])
+  @@index([companyId, status, deletedAt])
+  @@index([vehicleId, startTime])
+  @@index([driverId, startTime])
+  @@index([status, startTime])
+  @@index([deletedAt])
+  @@map("trips")
+}
+
+model TripStop {
+  id               String         @id @default(uuid()) @db.Uuid
+  tripId           String         @db.Uuid
+  routeStopId      String?        @db.Uuid
+  name             String
+  address          String
+  latitude         Float
+  longitude        Float
+  scheduledArrival DateTime?
+  actualArrival    DateTime?
+  actualDeparture  DateTime?
+  waitDuration     Int? // minutes
+  status           TripStopStatus @default(PENDING)
+  notes            String?
+  stopOrder        Int            @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  trip      Trip       @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  routeStop RouteStop? @relation(fields: [routeStopId], references: [id])
+
+  @@index([tripId])
+  @@index([tripId, status])
+  @@index([tripId, stopOrder])
+  @@map("trip_stops")
+}
+
+model Geofence {
+  id          String            @id @default(uuid()) @db.Uuid
+  companyId   String            @db.Uuid
+  name        String
+  description String?
+  type        GeofenceType      @default(CIRCLE)
+  coordinates Json // Array of [lat, lng] for polygon, or [lat, lng, radius] for circle
+  radius      Float? // meters, for circle
+  isActive    Boolean           @default(true)
+  alertType   GeofenceAlertType @default(BOTH)
+  speedLimit  Float? // km/h, for speed alerts
+  vehicles    String[] // Vehicle IDs to monitor (empty = all)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  company Company         @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  alerts  GeofenceAlert[]
+
+  @@index([companyId])
+  @@index([companyId, isActive])
+  @@index([companyId, deletedAt])
+  @@index([companyId, isActive, deletedAt])
+  @@index([deletedAt])
+  @@map("geofences")
+}
+
+model GeofenceAlert {
+  id             String            @id @default(uuid()) @db.Uuid
+  companyId      String            @db.Uuid
+  geofenceId     String            @db.Uuid
+  vehicleId      String            @db.Uuid
+  driverId       String?           @db.Uuid
+  alertType      GeofenceAlertType
+  latitude       Float
+  longitude      Float
+  speed          Float?
+  timestamp      DateTime
+  isAcknowledged Boolean           @default(false)
+  acknowledgedAt DateTime?
+  acknowledgedBy String?           @db.Uuid
+  notes          String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  geofence Geofence @relation(fields: [geofenceId], references: [id], onDelete: Cascade)
+  vehicle  Vehicle  @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  driver   Driver?  @relation(fields: [driverId], references: [id])
+
+  @@index([companyId])
+  @@index([geofenceId])
+  @@index([vehicleId])
+  @@index([companyId, geofenceId])
+  @@index([companyId, vehicleId])
+  @@index([timestamp])
+  @@index([companyId, timestamp])
+  @@map("geofence_alerts")
+}
+
+model FuelLog {
+  id                      String            @id @default(uuid()) @db.Uuid
+  companyId               String            @db.Uuid
+  vehicleId               String            @db.Uuid
+  driverId                String?           @db.Uuid
+  tripId                  String?           @db.Uuid
+  fuelStationId           String?           @db.Uuid
+  supplierId              String?           @db.Uuid
+  fuelType                FuelType
+  quantity                Float // liters or kWh
+  pricePerUnit            Float // per liter/kWh
+  totalCost               Float
+  currency                String            @default("KES")
+  odometerReading         Float?
+  previousOdometerReading Float?
+  distanceSinceLastRefuel Float?
+  consumptionRate         Float? // km/L or km/kWh
+  costPerKm               Float?
+  gpsLatitude             Float?
+  gpsLongitude            Float?
+  location                String?
+  stationName             String?
+  paymentMethod           FuelPaymentMethod @default(CASH)
+  fuelCardId              String?           @db.Uuid
+  receiptUrl              String?
+  receiptStatus           FuelReceiptStatus @default(MISSING)
+  status                  FuelLogStatus     @default(PENDING)
+  notes                   String?
+  fuelDate                DateTime
+  isManualEntry           Boolean           @default(true)
+  isBillable              Boolean           @default(false)
+  isReimbursable          Boolean           @default(false)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  company      Company               @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  vehicle      Vehicle               @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  driver       Driver?               @relation(fields: [driverId], references: [id])
+  trip         Trip?                 @relation(fields: [tripId], references: [id])
+  fuelStation  FuelStation?          @relation(fields: [fuelStationId], references: [id])
+  supplier     FuelSupplier?         @relation(fields: [supplierId], references: [id])
+  fuelCard     FuelCard?             @relation(fields: [fuelCardId], references: [id])
+  fraudAlerts  FuelFraudAlert[]
+  transactions FuelCardTransaction[]
+
+  @@index([companyId])
+  @@index([companyId, vehicleId])
+  @@index([companyId, driverId])
+  @@index([companyId, fuelDate])
+  @@index([companyId, status])
+  @@index([companyId, fuelStationId])
+  @@index([companyId, supplierId])
+  @@index([vehicleId, fuelDate])
+  @@index([companyId, fuelDate, vehicleId])
+  @@index([fuelCardId])
+  @@index([deletedAt])
+  @@map("fuel_logs")
+}
+
+model FuelStation {
+  id        String            @id @default(uuid()) @db.Uuid
+  companyId String            @db.Uuid
+  name      String
+  brand     String?
+  address   String?
+  city      String?
+  country   String?           @default("KE")
+  latitude  Float?
+  longitude Float?
+  phone     String?
+  email     String?
+  isGlobal  Boolean           @default(false)
+  status    FuelStationStatus @default(ACTIVE)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  company  Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  fuelLogs FuelLog[]
+
+  @@index([companyId])
+  @@index([companyId, status])
+  @@index([companyId, isGlobal])
+  @@index([companyId, deletedAt])
+  @@index([deletedAt])
+  @@map("fuel_stations")
+}
+
+model FuelSupplier {
+  id             String             @id @default(uuid()) @db.Uuid
+  companyId      String             @db.Uuid
+  name           String
+  contactName    String?
+  email          String?
+  phone          String?
+  address        String?
+  contractNumber String?
+  paymentTerms   String?
+  taxNumber      String?
+  status         FuelSupplierStatus @default(ACTIVE)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  company  Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  fuelLogs FuelLog[]
+
+  @@index([companyId])
+  @@index([companyId, status])
+  @@index([companyId, deletedAt])
+  @@index([deletedAt])
+  @@map("fuel_suppliers")
+}
+
+model FuelCard {
+  id                String         @id @default(uuid()) @db.Uuid
+  companyId         String         @db.Uuid
+  cardNumber        String
+  cardHolderName    String?
+  assignedDriverId  String?        @db.Uuid
+  assignedVehicleId String?        @db.Uuid
+  spendingLimit     Float?
+  dailyLimit        Float?
+  monthlyLimit      Float?
+  expiryDate        DateTime?
+  status            FuelCardStatus @default(ACTIVE)
+  pinCode           String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  company         Company               @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  assignedDriver  Driver?               @relation(fields: [assignedDriverId], references: [id])
+  assignedVehicle Vehicle?              @relation(fields: [assignedVehicleId], references: [id])
+  fuelLogs        FuelLog[]
+  transactions    FuelCardTransaction[]
+
+  @@unique([companyId, cardNumber])
+  @@index([companyId])
+  @@index([companyId, status])
+  @@index([companyId, assignedDriverId])
+  @@index([companyId, assignedVehicleId])
+  @@index([companyId, deletedAt])
+  @@index([deletedAt])
+  @@map("fuel_cards")
+}
+
+model FuelCardTransaction {
+  id              String   @id @default(uuid()) @db.Uuid
+  fuelCardId      String   @db.Uuid
+  fuelLogId       String?  @db.Uuid
+  amount          Float
+  currency        String   @default("KES")
+  location        String?
+  timestamp       DateTime @default(now())
+  transactionType String   @default("PURCHASE")
+  merchantName    String?
+  status          String   @default("COMPLETED")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  fuelCard FuelCard @relation(fields: [fuelCardId], references: [id], onDelete: Cascade)
+  fuelLog  FuelLog? @relation(fields: [fuelLogId], references: [id])
+
+  @@index([fuelCardId])
+  @@index([fuelCardId, timestamp])
+  @@index([fuelLogId])
+  @@map("fuel_card_transactions")
+}
+
+model FuelFraudAlert {
+  id              String          @id @default(uuid()) @db.Uuid
+  companyId       String          @db.Uuid
+  fuelLogId       String          @db.Uuid
+  vehicleId       String          @db.Uuid
+  driverId        String?         @db.Uuid
+  fraudType       FuelFraudType
+  status          FuelFraudStatus @default(OPEN)
+  confidenceScore Float           @default(0.5)
+  description     String?
+  detectedAt      DateTime        @default(now())
+  resolvedAt      DateTime?
+  resolvedBy      String?         @db.Uuid
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  fuelLog FuelLog @relation(fields: [fuelLogId], references: [id], onDelete: Cascade)
+  vehicle Vehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  driver  Driver? @relation(fields: [driverId], references: [id])
+
+  @@index([companyId])
+  @@index([companyId, status])
+  @@index([companyId, fraudType])
+  @@index([companyId, vehicleId])
+  @@index([companyId, driverId])
+  @@index([fuelLogId])
+  @@index([vehicleId])
+  @@index([status])
+  @@index([deletedAt])
+  @@map("fuel_fraud_alerts")
+}
+
+model VehicleFuelStats {
+  id                  String    @id @default(uuid()) @db.Uuid
+  companyId           String    @db.Uuid
+  vehicleId           String    @unique @db.Uuid
+  totalFuelConsumed   Float     @default(0)
+  totalFuelCost       Float     @default(0)
+  totalDistance       Float     @default(0)
+  averageConsumption  Float?
+  averageCostPerKm    Float?
+  lastRefuelDate      DateTime?
+  lastOdometerReading Float?
+  refuelCount         Int       @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  vehicle Vehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+  @@index([companyId, vehicleId])
+  @@map("vehicle_fuel_stats")
+}
+
+model DriverFuelStats {
+  id                 String @id @default(uuid()) @db.Uuid
+  companyId          String @db.Uuid
+  driverId           String @unique @db.Uuid
+  totalFuelConsumed  Float  @default(0)
+  totalFuelCost      Float  @default(0)
+  totalDistance      Float  @default(0)
+  averageConsumption Float?
+  averageCostPerKm   Float?
+  refuelCount        Int    @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  driver  Driver  @relation(fields: [driverId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+  @@index([companyId, driverId])
+  @@map("driver_fuel_stats")
+}
+
+model FuelEfficiencyBenchmark {
+  id                     String   @id @default(uuid()) @db.Uuid
+  companyId              String   @db.Uuid
+  vehicleCategoryId      String   @db.Uuid
+  expectedConsumptionMin Float?
+  expectedConsumptionMax Float?
+  fuelType               FuelType
+  unit                   String   @default("km/L")
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  company         Company         @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  vehicleCategory VehicleCategory @relation(fields: [vehicleCategoryId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+  @@index([companyId, vehicleCategoryId])
+  @@index([companyId, fuelType])
+  @@index([deletedAt])
+  @@map("fuel_efficiency_benchmarks")
+}
+
+model OdometerReading {
+  id          String              @id @default(uuid()) @db.Uuid
+  companyId   String              @db.Uuid
+  vehicleId   String              @db.Uuid
+  driverId    String?             @db.Uuid
+  tripId      String?             @db.Uuid
+  reading     Float
+  readingType OdometerReadingType @default(MANUAL)
+  source      String? // Device name, app version, etc.
+  notes       String?
+  recordedAt  DateTime            @default(now())
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  vehicle Vehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  driver  Driver? @relation(fields: [driverId], references: [id])
+  trip    Trip?   @relation(fields: [tripId], references: [id])
+
+  @@index([companyId])
+  @@index([companyId, vehicleId])
+  @@index([vehicleId, recordedAt])
+  @@index([companyId, vehicleId, recordedAt])
+  @@index([recordedAt])
+  @@map("odometer_readings")
+}
+
+model TripCargo {
+  id                   String  @id @default(uuid()) @db.Uuid
+  companyId            String  @db.Uuid
+  tripId               String  @db.Uuid
+  cargoType            String
+  weight               Float?
+  volume               Float?
+  quantity             Int?
+  isDangerousGoods     Boolean @default(false)
+  temperatureRequired  String?
+  customerReference    String?
+  deliveryInstructions String?
+  notes                String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  trip    Trip    @relation(fields: [tripId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+  @@index([tripId])
+  @@index([deletedAt])
+  @@map("trip_cargos")
+}
+
+model TripTimeline {
+  id        String   @id @default(uuid()) @db.Uuid
+  companyId String   @db.Uuid
+  tripId    String   @db.Uuid
+  eventType String // CREATED, APPROVED, STARTED, ARRIVED, DEPARTED, PAUSED, RESUMED, COMPLETED, CANCELLED
+  eventTime DateTime @default(now())
+  userId    String?  @db.Uuid
+  latitude  Float?
+  longitude Float?
+  notes     String?
+
+  createdAt DateTime @default(now())
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  trip    Trip    @relation(fields: [tripId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+  @@index([tripId])
+  @@index([tripId, eventTime])
+  @@map("trip_timelines")
+}
+
+model TripChecklist {
+  id          String    @id @default(uuid()) @db.Uuid
+  companyId   String    @db.Uuid
+  tripId      String    @db.Uuid
+  item        String
+  isRequired  Boolean   @default(true)
+  isCompleted Boolean   @default(false)
+  completedAt DateTime?
+  completedBy String?   @db.Uuid
+  notes       String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  trip    Trip    @relation(fields: [tripId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+  @@index([tripId])
+  @@map("trip_checklists")
+}
+
+model TripInspection {
+  id           String   @id @default(uuid()) @db.Uuid
+  companyId    String   @db.Uuid
+  tripId       String   @db.Uuid
+  type         String // PRE_TRIP, POST_TRIP
+  odometer     Float?
+  fuelLevel    Float?
+  photos       String[]
+  damageReport String?
+  comments     String?
+  signature    String?
+  inspectedBy  String?  @db.Uuid
+  inspectedAt  DateTime @default(now())
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  trip    Trip    @relation(fields: [tripId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+  @@index([tripId])
+  @@map("trip_inspections")
+}
+
+model TelemetryData {
+  id        String  @id @default(uuid()) @db.Uuid
+  companyId String  @db.Uuid
+  vehicleId String  @db.Uuid
+  deviceId  String? @db.Uuid
+  tripId    String? @db.Uuid
+  driverId  String? @db.Uuid
+
+  latitude  Float?
+  longitude Float?
+  altitude  Float?
+  speed     Float? // km/h
+  heading   Float? // degrees
+  accuracy  Float? // meters
+
+  ignition       Boolean?
+  engineStatus   String? // ON, OFF, IDLE
+  batteryVoltage Float?
+  fuelLevel      Float? // percentage
+  engineHours    Float? // hours
+  odometer       Float? // km
+
+  harshBraking      Boolean? @default(false)
+  harshAcceleration Boolean? @default(false)
+  sharpCornering    Boolean? @default(false)
+  overspeed         Boolean? @default(false)
+  idleTime          Int? // minutes
+  distance          Float? // km since last reading
+
+  temperature  Float? // engine temperature
+  tirePressure Json? // { frontLeft, frontRight, rearLeft, rearRight }
+
+  timestamp  DateTime
+  receivedAt DateTime @default(now())
+
+  createdAt DateTime @default(now())
+
+  company Company    @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  vehicle Vehicle    @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  device  GPSDevice? @relation(fields: [deviceId], references: [id])
+  trip    Trip?      @relation(fields: [tripId], references: [id])
+  driver  Driver?    @relation(fields: [driverId], references: [id])
+
+  @@index([companyId])
+  @@index([vehicleId])
+  @@index([companyId, vehicleId])
+  @@index([companyId, vehicleId, timestamp])
+  @@index([timestamp])
+  @@index([tripId])
+  @@map("telemetry_data")
+}
+
+model DriverBehavior {
+  id          String   @id @default(uuid()) @db.Uuid
+  companyId   String   @db.Uuid
+  driverId    String   @db.Uuid
+  vehicleId   String?  @db.Uuid
+  periodStart DateTime
+  periodEnd   DateTime
+
+  totalTrips    Int    @default(0)
+  totalDistance Float? // km
+  totalDuration Int? // minutes
+  totalIdleTime Int? // minutes
+
+  safetyScore     Float? // 0-100
+  aggressiveScore Float? // 0-100
+  efficiencyScore Float? // 0-100
+
+  speedingEvents          Int @default(0)
+  harshBrakingEvents      Int @default(0)
+  harshAccelerationEvents Int @default(0)
+  corneringEvents         Int @default(0)
+  overspeedEvents         Int @default(0)
+  longIdleEvents          Int @default(0)
+
+  avgSpeed Float? // km/h
+  maxSpeed Float? // km/h
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  company Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  driver  Driver   @relation(fields: [driverId], references: [id], onDelete: Cascade)
+  vehicle Vehicle? @relation(fields: [vehicleId], references: [id])
+
+  @@unique([companyId, driverId, vehicleId, periodStart])
+  @@index([companyId])
+  @@index([driverId])
+  @@index([companyId, driverId])
+  @@index([companyId, driverId, periodStart])
+  @@index([companyId, driverId, periodEnd])
+  @@map("driver_behaviors")
+}
+
+model VehicleAlert {
+  id        String  @id @default(uuid()) @db.Uuid
+  companyId String  @db.Uuid
+  vehicleId String  @db.Uuid
+  driverId  String? @db.Uuid
+  alertType String // OVERSPEED, OFFLINE, LOW_BATTERY, IDLE, UNAUTHORIZED_MOVEMENT, ROUTE_DEVIATION, EMERGENCY_SOS, GEOFENCE_ENTER, GEOFENCE_EXIT
+  severity  String  @default("MEDIUM") // LOW, MEDIUM, HIGH, CRITICAL
+  status    String  @default("ACTIVE") // ACTIVE, ACKNOWLEDGED, RESOLVED, DISMISSED
+  latitude  Float?
+  longitude Float?
+  speed     Float?
+  value     String? // e.g. "120 km/h" for overspeed
+  message   String?
+  metadata  Json?
+
+  isAcknowledged  Boolean   @default(false)
+  acknowledgedAt  DateTime?
+  acknowledgedBy  String?   @db.Uuid
+  resolvedAt      DateTime?
+  resolvedBy      String?   @db.Uuid
+  resolutionNotes String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  vehicle Vehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  driver  Driver? @relation(fields: [driverId], references: [id])
+
+  @@index([companyId])
+  @@index([vehicleId])
+  @@index([companyId, vehicleId])
+  @@index([companyId, alertType])
+  @@index([companyId, status])
+  @@index([companyId, vehicleId, status])
+  @@index([companyId, alertType, status])
+  @@index([createdAt])
+  @@map("vehicle_alerts")
+}
+
+// ============================================================================
+// MAINTENANCE
+// ============================================================================
+
+model ServiceCenter {
+  id             String   @id @default(uuid()) @db.Uuid
+  companyId      String   @db.Uuid
+  name           String
+  contactName    String?
+  email          String?
+  phone          String?
+  phone2         String?
+  address        String?
+  city           String?
+  state          String?
+  country        String?
+  postalCode     String?
+  website        String?
+  isActive       Boolean  @default(true)
+  rating         Float?
+  certifications String[]
+  specialization String?
+  isInternal     Boolean  @default(false)
+  notes          String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  company            Company             @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  maintenanceRecords MaintenanceRecord[]
+  workOrders         WorkOrder[]
+
+  @@index([companyId])
+  @@index([companyId, isActive])
+  @@index([companyId, deletedAt])
+  @@index([companyId, isActive, deletedAt])
+  @@index([deletedAt])
+  @@map("service_centers")
+}
+
+model MaintenanceSchedule {
+  id                  String                  @id @default(uuid()) @db.Uuid
+  companyId           String                  @db.Uuid
+  vehicleId           String                  @db.Uuid
+  name                String
+  scheduleType        MaintenanceScheduleType @default(TIME_BASED)
+  intervalMonths      Int?
+  intervalMileage     Float?
+  intervalHours       Float? // For hour-based equipment
+  lastServiceDate     DateTime?
+  lastServiceOdometer Float?
+  nextDueDate         DateTime?
+  nextDueOdometer     Float?
+  description         String?
+  isActive            Boolean                 @default(true)
+  reminderDays        Int                     @default(7)
+  reminderOdometer    Float? // km before due
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  company            Company             @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  vehicle            Vehicle             @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  maintenanceRecords MaintenanceRecord[]
+  workOrders         WorkOrder[]
+
+  @@index([companyId])
+  @@index([companyId, vehicleId])
+  @@index([companyId, nextDueDate])
+  @@index([companyId, isActive])
+  @@index([companyId, isActive, nextDueDate])
+  @@index([companyId, deletedAt])
+  @@index([vehicleId, nextDueDate])
+  @@index([deletedAt])
+  @@map("maintenance_schedules")
+}
+
+model MaintenanceRecord {
+  id                 String              @id @default(uuid()) @db.Uuid
+  companyId          String              @db.Uuid
+  vehicleId          String              @db.Uuid
+  scheduleId         String?             @db.Uuid
+  serviceCenterId    String?             @db.Uuid
+  mechanicId         String?             @db.Uuid
+  serviceNumber      String?
+  serviceDate        DateTime
+  completionDate     DateTime?
+  status             MaintenanceStatus   @default(SCHEDULED)
+  priority           MaintenancePriority @default(NORMAL)
+  odometerReading    Float?
+  laborCost          Float?
+  partsCost          Float?
+  totalCost          Float?
+  taxAmount          Float?
+  currency           String              @default("KES")
+  description        String?
+  workPerformed      String?
+  recommendations    String?
+  technicianName     String?
+  invoiceNumber      String?
+  warrantyMonths     Int?
+  warrantyExpiry     DateTime?
+  isWarrantyValid    Boolean             @default(false)
+  beforeCondition    String?
+  afterCondition     String?
+  qualityCheckPassed Boolean?
+  qualityCheckNotes  String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  company          Company              @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  vehicle          Vehicle              @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  schedule         MaintenanceSchedule? @relation(fields: [scheduleId], references: [id])
+  serviceCenter    ServiceCenter?       @relation(fields: [serviceCenterId], references: [id])
+  mechanic         Mechanic?            @relation(fields: [mechanicId], references: [id])
+  workOrder        WorkOrder?
+  spareParts       SparePart[]
+  maintenanceCosts MaintenanceCost[]
+
+  @@unique([companyId, serviceNumber])
+  @@index([companyId])
+  @@index([companyId, vehicleId])
+  @@index([companyId, serviceDate])
+  @@index([companyId, status])
+  @@index([companyId, status, serviceDate])
+  @@index([companyId, deletedAt])
+  @@index([vehicleId, serviceDate])
+  @@index([serviceCenterId])
+  @@index([mechanicId])
+  @@index([deletedAt])
+  @@map("maintenance_records")
+}
+
+model SparePart {
+  id                  String  @id @default(uuid()) @db.Uuid
+  companyId           String  @db.Uuid
+  maintenanceRecordId String  @db.Uuid
+  name                String
+  partNumber          String?
+  quantity            Int     @default(1)
+  unitPrice           Float
+  totalPrice          Float
+  manufacturer        String?
+  supplier            String?
+  warrantyMonths      Int?
+  notes               String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  company           Company           @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  maintenanceRecord MaintenanceRecord @relation(fields: [maintenanceRecordId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+  @@index([maintenanceRecordId])
+  @@index([companyId, partNumber])
+  @@map("spare_parts")
+}
+
+model MaintenanceCost {
+  id                  String   @id @default(uuid()) @db.Uuid
+  companyId           String   @db.Uuid
+  maintenanceRecordId String   @db.Uuid
+  costType            CostType
+  amount              Float
+  description         String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  company           Company           @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  maintenanceRecord MaintenanceRecord @relation(fields: [maintenanceRecordId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+  @@index([maintenanceRecordId])
+  @@index([companyId, costType])
+  @@map("maintenance_costs")
+}
+
+model WorkOrder {
+  id                  String              @id @default(uuid()) @db.Uuid
+  companyId           String              @db.Uuid
+  workOrderNumber     String              @unique
+  vehicleId           String              @db.Uuid
+  scheduleId          String?             @db.Uuid
+  serviceTemplateId   String?             @db.Uuid
+  maintenanceRecordId String?             @unique @db.Uuid
+  mechanicId          String?             @db.Uuid
+  supervisorId        String?             @db.Uuid
+  serviceCenterId     String?             @db.Uuid
+  jobType             MaintenanceJobType  @default(PREVENTIVE)
+  priority            MaintenancePriority @default(NORMAL)
+  status              WorkOrderStatus     @default(DRAFT)
+  title               String
+  description         String?
+  scheduledDate       DateTime?
+  startDate           DateTime?
+  completionDate      DateTime?
+  estimatedCost       Float?
+  actualCost          Float?
+  estimatedDuration   Int? // minutes
+  actualDuration      Int? // minutes
+  notes               String?
+  digitalSignature    String?
+  approvalStatus      String              @default("PENDING") // PENDING, APPROVED, REJECTED
+  approvedBy          String?             @db.Uuid
+  approvedAt          DateTime?
+  inspectionPassed    Boolean?
+  beforePhotos        String[]
+  afterPhotos         String[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  company                  Company                   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  vehicle                  Vehicle                   @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  schedule                 MaintenanceSchedule?      @relation(fields: [scheduleId], references: [id])
+  serviceTemplate          ServiceTemplate?          @relation(fields: [serviceTemplateId], references: [id])
+  maintenanceRecord        MaintenanceRecord?        @relation(fields: [maintenanceRecordId], references: [id])
+  mechanic                 Mechanic?                 @relation(fields: [mechanicId], references: [id])
+  supervisor               User?                     @relation(fields: [supervisorId], references: [id], name: "WorkOrderSupervisor")
+  serviceCenter            ServiceCenter?            @relation(fields: [serviceCenterId], references: [id])
+  workOrderChecklists      WorkOrderChecklist[]
+  vehicleDowntimes         VehicleDowntime[]
+  maintenanceNotifications MaintenanceNotification[]
+
+  @@index([companyId])
+  @@index([companyId, vehicleId])
+  @@index([companyId, status])
+  @@index([companyId, mechanicId])
+  @@index([companyId, deletedAt])
+  @@index([vehicleId])
+  @@index([mechanicId])
+  @@index([maintenanceRecordId])
+  @@index([serviceTemplateId])
+  @@index([deletedAt])
+  @@map("work_orders")
+}
+
+model Mechanic {
+  id             String         @id @default(uuid()) @db.Uuid
+  companyId      String         @db.Uuid
+  firstName      String
+  lastName       String
+  email          String?
+  phone          String?
+  employeeId     String?
+  hireDate       DateTime?
+  status         MechanicStatus @default(ACTIVE)
+  skills         String[]
+  certifications String[]
+  hourlyRate     Float?
+  notes          String?
+  photo          String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  company            Company             @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  workOrders         WorkOrder[]
+  maintenanceRecords MaintenanceRecord[]
+
+  @@index([companyId])
+  @@index([companyId, status])
+  @@index([companyId, deletedAt])
+  @@index([deletedAt])
+  @@map("mechanics")
+}
+
+model ServiceTemplate {
+  id                String              @id @default(uuid()) @db.Uuid
+  companyId         String              @db.Uuid
+  name              String
+  description       String?
+  templateType      ServiceTemplateType @default(CUSTOM)
+  estimatedDuration Int? // minutes
+  estimatedCost     Float?
+  isActive          Boolean             @default(true)
+  sortOrder         Int                 @default(0)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  company              Company               @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  serviceTemplateItems ServiceTemplateItem[]
+  workOrders           WorkOrder[]
+
+  @@index([companyId])
+  @@index([companyId, isActive])
+  @@index([companyId, deletedAt])
+  @@index([deletedAt])
+  @@map("service_templates")
+}
+
+model ServiceTemplateItem {
+  id                String  @id @default(uuid()) @db.Uuid
+  serviceTemplateId String  @db.Uuid
+  itemName          String
+  description       String?
+  estimatedTime     Int? // minutes
+  isRequired        Boolean @default(true)
+  sortOrder         Int     @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  serviceTemplate     ServiceTemplate      @relation(fields: [serviceTemplateId], references: [id], onDelete: Cascade)
+  workOrderChecklists WorkOrderChecklist[]
+
+  @@index([serviceTemplateId])
+  @@map("service_template_items")
+}
+
+model WorkOrderChecklist {
+  id                    String              @id @default(uuid()) @db.Uuid
+  workOrderId           String              @db.Uuid
+  serviceTemplateItemId String?             @db.Uuid
+  status                ChecklistItemStatus @default(NOT_STARTED)
+  notes                 String?
+  completedAt           DateTime?
+  completedBy           String?             @db.Uuid
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  workOrder           WorkOrder            @relation(fields: [workOrderId], references: [id], onDelete: Cascade)
+  serviceTemplateItem ServiceTemplateItem? @relation(fields: [serviceTemplateItemId], references: [id])
+
+  @@index([workOrderId])
+  @@index([workOrderId, status])
+  @@map("work_order_checklists")
+}
+
+model VehicleDowntime {
+  id          String         @id @default(uuid()) @db.Uuid
+  companyId   String         @db.Uuid
+  vehicleId   String         @db.Uuid
+  workOrderId String?        @db.Uuid
+  reason      DowntimeReason @default(SCHEDULED_MAINTENANCE)
+  startDate   DateTime
+  endDate     DateTime?
+  totalHours  Float?
+  description String?
+  impactNotes String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  company   Company    @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  vehicle   Vehicle    @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  workOrder WorkOrder? @relation(fields: [workOrderId], references: [id])
+
+  @@index([companyId])
+  @@index([companyId, vehicleId])
+  @@index([companyId, startDate])
+  @@index([companyId, deletedAt])
+  @@index([vehicleId, startDate])
+  @@index([deletedAt])
+  @@map("vehicle_downtimes")
+}
+
+model MaintenanceNotification {
+  id                  String    @id @default(uuid()) @db.Uuid
+  companyId           String    @db.Uuid
+  maintenanceRecordId String?   @db.Uuid
+  scheduleId          String?   @db.Uuid
+  workOrderId         String?   @db.Uuid
+  notificationType    String
+  title               String
+  message             String
+  isRead              Boolean   @default(false)
+  sentAt              DateTime  @default(now())
+  readAt              DateTime?
+
+  createdAt DateTime @default(now())
+
+  company   Company    @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  workOrder WorkOrder? @relation(fields: [workOrderId], references: [id])
+
+  @@index([companyId])
+  @@index([companyId, isRead])
+  @@index([companyId, sentAt])
+  @@index([workOrderId])
+  @@map("maintenance_notifications")
+}
+
+// ============================================================================
+// DOCUMENTS
+// ============================================================================
+
+model VehicleDocument {
+  id           String       @id @default(uuid()) @db.Uuid
+  companyId    String       @db.Uuid
+  vehicleId    String       @db.Uuid
+  documentType DocumentType
+  title        String
+  fileUrl      String
+  fileName     String?
+  fileSize     Int?
+  mimeType     String?
+  expiryDate   DateTime?
+  renewalDate  DateTime?
+  issueDate    DateTime?
+  reminderDays Int          @default(30)
+  isVerified   Boolean      @default(false)
+  verifiedAt   DateTime?
+  verifiedBy   String?      @db.Uuid
+  isActive     Boolean      @default(true)
+  notes        String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  vehicle Vehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+  @@index([companyId, vehicleId])
+  @@index([companyId, documentType])
+  @@index([companyId, expiryDate])
+  @@index([vehicleId, documentType])
+  @@index([companyId, vehicleId, documentType])
+  @@index([expiryDate])
+  @@index([deletedAt])
+  @@map("vehicle_documents")
+}
+
+model DriverDocument {
+  id           String       @id @default(uuid()) @db.Uuid
+  companyId    String       @db.Uuid
+  driverId     String       @db.Uuid
+  documentType DocumentType
+  title        String
+  fileUrl      String
+  fileName     String?
+  fileSize     Int?
+  mimeType     String?
+  expiryDate   DateTime?
+  issueDate    DateTime?
+  isVerified   Boolean      @default(false)
+  verifiedAt   DateTime?
+  verifiedBy   String?      @db.Uuid
+  notes        String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  driver  Driver  @relation(fields: [driverId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+  @@index([companyId, driverId])
+  @@index([companyId, documentType])
+  @@index([companyId, expiryDate])
+  @@index([driverId, documentType])
+  @@index([companyId, driverId, documentType])
+  @@index([expiryDate])
+  @@index([deletedAt])
+  @@map("driver_documents")
+}
+
+model DriverCertification {
+  id          String    @id @default(uuid()) @db.Uuid
+  companyId   String    @db.Uuid
+  driverId    String    @db.Uuid
+  name        String
+  issuer      String?
+  issueDate   DateTime?
+  expiryDate  DateTime?
+  documentUrl String?
+  isVerified  Boolean   @default(false)
+  verifiedAt  DateTime?
+  verifiedBy  String?   @db.Uuid
+  status      String    @default("ACTIVE")
+  notes       String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  driver  Driver  @relation(fields: [driverId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+  @@index([companyId, driverId])
+  @@index([driverId])
+  @@index([companyId, expiryDate])
+  @@index([expiryDate])
+  @@index([deletedAt])
+  @@map("driver_certifications")
+}
+
+model DriverMedicalRecord {
+  id              String    @id @default(uuid()) @db.Uuid
+  companyId       String    @db.Uuid
+  driverId        String    @db.Uuid
+  examinationDate DateTime
+  expiryDate      DateTime?
+  bloodGroup      String?
+  visionStatus    String?   @default("PASS")
+  hearingStatus   String?   @default("PASS")
+  fitnessStatus   String?   @default("FIT")
+  height          Float? // cm
+  weight          Float? // kg
+  bmi             Float?
+  bloodPressure   String?
+  heartRate       Int?
+  medicalOfficer  String?
+  documentUrl     String?
+  notes           String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  driver  Driver  @relation(fields: [driverId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+  @@index([companyId, driverId])
+  @@index([driverId])
+  @@index([companyId, expiryDate])
+  @@index([expiryDate])
+  @@index([deletedAt])
+  @@map("driver_medical_records")
+}
+
+model Insurance {
+  id             String       @id @default(uuid()) @db.Uuid
+  companyId      String       @db.Uuid
+  vehicleId      String       @db.Uuid
+  provider       String
+  policyNumber   String
+  coverageType   CoverageType
+  startDate      DateTime
+  endDate        DateTime
+  premium        Float?
+  coverageAmount Float?
+  deductible     Float?
+  isActive       Boolean      @default(true)
+  documentUrl    String?
+  notes          String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  vehicle Vehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, policyNumber])
+  @@index([companyId])
+  @@index([companyId, vehicleId])
+  @@index([companyId, endDate])
+  @@index([companyId, isActive])
+  @@index([companyId, isActive, endDate])
+  @@index([companyId, deletedAt])
+  @@index([vehicleId, endDate])
+  @@index([deletedAt])
+  @@map("insurances")
+}
+
+model Inspection {
+  id                 String           @id @default(uuid()) @db.Uuid
+  companyId          String           @db.Uuid
+  vehicleId          String           @db.Uuid
+  inspectionType     String
+  inspectorName      String?
+  inspectorLicense   String?
+  inspectionDate     DateTime
+  nextInspectionDate DateTime?
+  result             InspectionResult @default(PASS)
+  score              Float?
+  notes              String?
+  documentUrl        String?
+  isActive           Boolean          @default(true)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  vehicle Vehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+  @@index([companyId, vehicleId])
+  @@index([companyId, nextInspectionDate])
+  @@index([companyId, isActive])
+  @@index([companyId, isActive, nextInspectionDate])
+  @@index([companyId, deletedAt])
+  @@index([vehicleId, inspectionDate])
+  @@index([deletedAt])
+  @@map("inspections")
+}
+
+// ============================================================================
+// FINANCE
+// ============================================================================
+
+model Customer {
+  id           String  @id @default(uuid()) @db.Uuid
+  companyId    String  @db.Uuid
+  name         String
+  email        String
+  phone        String?
+  phone2       String?
+  address      String?
+  address2     String?
+  city         String?
+  state        String?
+  country      String?
+  postalCode   String?
+  taxId        String?
+  website      String?
+  isActive     Boolean @default(true)
+  creditLimit  Float?
+  balance      Float   @default(0)
+  paymentTerms Int?    @default(30) // days
+  notes        String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  company  Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  trips    Trip[]
+  invoices Invoice[]
+  payments Payment[]
+  expenses Expense[]
+
+  @@unique([companyId, email])
+  @@index([companyId])
+  @@index([companyId, name])
+  @@index([companyId, isActive])
+  @@index([companyId, deletedAt])
+  @@index([companyId, isActive, deletedAt])
+  @@index([deletedAt])
+  @@map("customers")
+}
+
+model Invoice {
+  id             String        @id @default(uuid()) @db.Uuid
+  companyId      String        @db.Uuid
+  customerId     String?       @db.Uuid
+  subscriptionId String?       @db.Uuid
+  invoiceNumber  String        @unique
+  issueDate      DateTime      @default(now())
+  dueDate        DateTime
+  paidDate       DateTime?
+  subtotal       Float
+  taxRate        Float         @default(0)
+  taxAmount      Float         @default(0)
+  discountAmount Float         @default(0)
+  total          Float
+  amountPaid     Float         @default(0)
+  amountDue      Float
+  status         InvoiceStatus @default(DRAFT)
+  currency       String        @default("KES")
+  notes          String?
+  terms          String?
+  footer         String?
+  pdfUrl         String?
+  sentAt         DateTime?
+  sentBy         String?       @db.Uuid
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  company      Company              @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  customer     Customer?            @relation(fields: [customerId], references: [id])
+  subscription CompanySubscription? @relation(fields: [subscriptionId], references: [id])
+  payments     Payment[]
+  expenses     Expense[]
+
+  @@index([companyId])
+  @@index([companyId, status])
+  @@index([companyId, dueDate])
+  @@index([companyId, customerId])
+  @@index([companyId, status, dueDate])
+  @@index([companyId, deletedAt])
+  @@index([customerId, status])
+  @@index([dueDate, status])
+  @@index([deletedAt])
+  @@map("invoices")
+}
+
+model Payment {
+  id              String        @id @default(uuid()) @db.Uuid
+  companyId       String        @db.Uuid
+  invoiceId       String?       @db.Uuid
+  customerId      String?       @db.Uuid
+  amount          Float
+  currency        String        @default("KES")
+  method          PaymentMethod
+  status          PaymentStatus @default(PENDING)
+  transactionId   String?
+  gatewayResponse Json?
+  paidAt          DateTime?
+  processedBy     String?       @db.Uuid
+  notes           String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  company  Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  invoice  Invoice?  @relation(fields: [invoiceId], references: [id])
+  customer Customer? @relation(fields: [customerId], references: [id])
+
+  @@index([companyId])
+  @@index([companyId, status])
+  @@index([companyId, paidAt])
+  @@index([companyId, method])
+  @@index([companyId, deletedAt])
+  @@index([invoiceId])
+  @@index([customerId])
+  @@index([status, paidAt])
+  @@index([deletedAt])
+  @@map("payments")
+}
+
+model Expense {
+  id              String          @id @default(uuid()) @db.Uuid
+  companyId       String          @db.Uuid
+  tripId          String?         @db.Uuid
+  customerId      String?         @db.Uuid
+  invoiceId       String?         @db.Uuid
+  category        ExpenseCategory
+  amount          Float
+  currency        String          @default("KES")
+  expenseDate     DateTime
+  description     String?
+  receiptUrl      String?
+  isReimbursable  Boolean         @default(false)
+  isBillable      Boolean         @default(false)
+  status          ExpenseStatus   @default(PENDING)
+  approvedBy      String?         @db.Uuid
+  approvedAt      DateTime?
+  rejectedBy      String?         @db.Uuid
+  rejectedAt      DateTime?
+  rejectionReason String?
+  vendor          String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  company  Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  trip     Trip?     @relation(fields: [tripId], references: [id])
+  customer Customer? @relation(fields: [customerId], references: [id])
+  invoice  Invoice?  @relation(fields: [invoiceId], references: [id])
+
+  @@index([companyId])
+  @@index([companyId, expenseDate])
+  @@index([companyId, category])
+  @@index([companyId, status])
+  @@index([companyId, expenseDate, category])
+  @@index([companyId, deletedAt])
+  @@index([tripId])
+  @@index([customerId])
+  @@index([invoiceId])
+  @@index([deletedAt])
+  @@map("expenses")
+}
+
+// ============================================================================
+// COMMUNICATION
+// ============================================================================
+
+model Notification {
+  id            String              @id @default(uuid()) @db.Uuid
+  companyId     String              @db.Uuid
+  userId        String?             @db.Uuid
+  driverId      String?             @db.Uuid
+  type          NotificationType
+  title         String
+  message       String
+  data          Json?
+  isRead        Boolean             @default(false)
+  readAt        DateTime?
+  channel       NotificationChannel @default(IN_APP)
+  sentAt        DateTime?
+  deliveredAt   DateTime?
+  failedAt      DateTime?
+  failureReason String?
+  actionUrl     String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  user    User?   @relation(fields: [userId], references: [id])
+  driver  Driver? @relation(fields: [driverId], references: [id])
+
+  @@index([companyId])
+  @@index([companyId, userId])
+  @@index([companyId, driverId])
+  @@index([companyId, isRead])
+  @@index([companyId, type])
+  @@index([companyId, createdAt])
+  @@index([companyId, userId, isRead])
+  @@index([companyId, driverId, isRead])
+  @@index([userId, isRead])
+  @@index([driverId, isRead])
+  @@index([createdAt])
+  @@map("notifications")
+}
+
+model NotificationPreference {
+  id              String              @id @default(uuid()) @db.Uuid
+  companyId       String              @db.Uuid
+  userId          String              @db.Uuid
+  type            NotificationType
+  channel         NotificationChannel
+  isEnabled       Boolean             @default(true)
+  quietHoursStart Int?
+  quietHoursEnd   Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, userId, type, channel])
+  @@index([companyId])
+  @@index([companyId, userId])
+  @@index([companyId, userId, type])
+  @@map("notification_preferences")
+}
+
+// ============================================================================
+// REPORTS & AUDITING
+// ============================================================================
+
+model AuditLog {
+  id         String      @id @default(uuid()) @db.Uuid
+  companyId  String      @db.Uuid
+  userId     String?     @db.Uuid
+  action     AuditAction
+  entityType String
+  entityId   String?     @db.Uuid
+  oldValue   Json?
+  newValue   Json?
+  ipAddress  String?
+  userAgent  String?
+  sessionId  String?     @db.Uuid
+  metadata   Json?
+
+  createdAt DateTime @default(now())
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  user    User?   @relation(fields: [userId], references: [id])
+
+  @@index([companyId])
+  @@index([companyId, action])
+  @@index([companyId, entityType])
+  @@index([companyId, entityType, entityId])
+  @@index([companyId, createdAt])
+  @@index([companyId, action, createdAt])
+  @@index([companyId, userId])
+  @@index([userId, createdAt])
+  @@index([createdAt])
+  @@index([action, entityType])
+  @@index([entityType, entityId])
+  @@map("audit_logs")
+}
+
+model ActivityLog {
+  id          String  @id @default(uuid()) @db.Uuid
+  companyId   String  @db.Uuid
+  userId      String? @db.Uuid
+  driverId    String? @db.Uuid
+  action      String
+  description String?
+  metadata    Json?
+  ipAddress   String?
+  userAgent   String?
+
+  createdAt DateTime @default(now())
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  user    User?   @relation(fields: [userId], references: [id])
+  driver  Driver? @relation(fields: [driverId], references: [id])
+
+  @@index([companyId])
+  @@index([companyId, userId])
+  @@index([companyId, driverId])
+  @@index([companyId, createdAt])
+  @@index([companyId, action])
+  @@index([companyId, action, createdAt])
+  @@index([userId, createdAt])
+  @@index([driverId, createdAt])
+  @@index([createdAt])
+  @@map("activity_logs")
+}
+
+// ============================================================================
+// SaaS
+// ============================================================================
+
+model SubscriptionPlan {
+  id              String          @id @default(uuid()) @db.Uuid
+  name            String          @unique
+  slug            String          @unique
+  description     String?
+  price           Float
+  currency        String          @default("KES")
+  billingInterval BillingInterval @default(MONTHLY)
+  vehicleLimit    Int
+  userLimit       Int
+  tripLimit       Int? // Per month, null = unlimited
+  featureFlags    Json?           @default("{}")
+  isActive        Boolean         @default(true)
+  isPublic        Boolean         @default(true)
+  isEnterprise    Boolean         @default(false)
+  trialDays       Int             @default(14)
+  sortOrder       Int             @default(0)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  subscriptions CompanySubscription[]
+
+  @@index([isActive])
+  @@index([isPublic])
+  @@index([isActive, isPublic])
+  @@index([deletedAt])
+  @@map("subscription_plans")
+}
+
+model CompanySubscription {
+  id                 String             @id @default(uuid()) @db.Uuid
+  companyId          String             @unique @db.Uuid
+  planId             String             @db.Uuid
+  status             SubscriptionStatus @default(TRIAL)
+  startDate          DateTime
+  endDate            DateTime?
+  trialEndsAt        DateTime?
+  vehicleLimit       Int
+  userLimit          Int
+  tripLimit          Int?
+  amount             Float
+  currency           String             @default("KES")
+  billingInterval    BillingInterval    @default(MONTHLY)
+  nextBillingDate    DateTime?
+  autoRenew          Boolean            @default(true)
+  paymentMethod      PaymentMethod?
+  cancellationReason String?
+  cancelledAt        DateTime?
+  cancelledBy        String?            @db.Uuid
+  metadata           Json?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  company  Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  plan     SubscriptionPlan @relation(fields: [planId], references: [id])
+  invoices Invoice[]
+
+  @@index([companyId])
+  @@index([planId])
+  @@index([status])
+  @@index([endDate])
+  @@index([nextBillingDate])
+  @@index([status, nextBillingDate])
+  @@index([deletedAt])
+  @@map("company_subscriptions")
+}
+
+model APIKey {
+  id          String    @id @default(uuid()) @db.Uuid
+  companyId   String    @db.Uuid
+  userId      String    @db.Uuid
+  name        String
+  keyHash     String    @unique
+  keyPrefix   String // First 8 chars of the key for identification
+  lastUsedAt  DateTime?
+  expiresAt   DateTime?
+  permissions String[] // Array of permission codes
+  isActive    Boolean   @default(true)
+  rateLimit   Int       @default(1000)
+  ipWhitelist String[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+  @@index([companyId, isActive])
+  @@index([companyId, deletedAt])
+  @@index([companyId, isActive, deletedAt])
+  @@index([userId])
+  @@index([deletedAt])
+  @@index([keyHash])
+  @@map("api_keys")
+}
+
+model Webhook {
+  id              String        @id @default(uuid()) @db.Uuid
+  companyId       String        @db.Uuid
+  name            String
+  url             String
+  secret          String
+  events          String[]
+  status          WebhookStatus @default(ACTIVE)
+  lastTriggeredAt DateTime?
+  lastFailedAt    DateTime?
+  failureCount    Int           @default(0)
+  retryCount      Int           @default(3)
+  timeoutMs       Int           @default(30000)
+  headers         Json?
+
+  createdAt DateTime  @default(now())
+
+// ============================================================================
+// INVENTORY & SPARE PARTS
+// ============================================================================
+
+enum PurchaseOrderStatus {
+  DRAFT
+  PENDING
+  APPROVED
+  ORDERED
+  PARTIAL
+  RECEIVED
+  CANCELLED
+}
+
+enum WarehouseTransferStatus {
+  DRAFT
+  PENDING
+  IN_TRANSIT
+  RECEIVED
+  CANCELLED
+}
+
+model Warehouse {
+  id          String   @id @default(uuid()) @db.Uuid
+  companyId   String   @db.Uuid
+  name        String
+  code        String
+  address     String?
+  city        String?
+  state       String?
+  country     String?
+  postalCode  String?
+  latitude    Float?
+  longitude   Float?
+  phone       String?
+  email       String?
+  managerId   String?  @db.Uuid
+  capacity    Int?
+  isActive    Boolean  @default(true)
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, code])
+  @@index([companyId])
+  @@index([companyId, isActive])
+  @@index([companyId, deletedAt])
+  @@map("warehouses")
+}
+
+model PartCategory {
+  id          String  @id @default(uuid()) @db.Uuid
+  companyId   String  @db.Uuid
+  name        String
+  description String?
+  color       String?
+  isActive    Boolean @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, name])
+  @@index([companyId])
+  @@index([companyId, isActive])
+  @@index([companyId, deletedAt])
+  @@map("part_categories")
+}
+
+model InventoryPart {
+  id           String   @id @default(uuid()) @db.Uuid
+  companyId    String   @db.Uuid
+  categoryId   String?  @db.Uuid
+  name         String
+  partNumber   String?
+  description  String?
+  manufacturer String?
+  unitPrice    Float?
+  costPrice    Float?
+  unitOfMeasure String? @default("piece")
+  minStockLevel Int?    @default(0)
+  maxStockLevel Int?
+  reorderPoint  Int?    @default(0)
+  isActive      Boolean @default(true)
+  barcode       String?
+  sku           String?
+  locationCode  String?
+  notes         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  deletedAt     DateTime?
+
+  company  Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  category PartCategory? @relation(fields: [categoryId], references: [id])
+
+  @@unique([companyId, partNumber])
+  @@index([companyId])
+  @@index([companyId, categoryId])
+  @@index([companyId, isActive])
+  @@index([companyId, deletedAt])
+  @@map("inventory_parts")
+}
+
+model Stock {
+  id               String  @id @default(uuid()) @db.Uuid
+  companyId        String  @db.Uuid
+  partId           String  @db.Uuid
+  warehouseId      String  @db.Uuid
+  quantity         Int     @default(0)
+  reservedQuantity Int     @default(0)
+  availableQuantity Int    @default(0)
+  unitCost         Float?
+  lastCountedAt    DateTime?
+  notes            String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  part    InventoryPart @relation(fields: [partId], references: [id], onDelete: Cascade)
+  warehouse Warehouse @relation(fields: [warehouseId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, partId, warehouseId])
+  @@index([companyId])
+  @@index([companyId, partId])
+  @@index([companyId, warehouseId])
+  @@map("stocks")
+}
+
+model StockMovement {
+  id            String  @id @default(uuid()) @db.Uuid
+  companyId     String  @db.Uuid
+  partId        String  @db.Uuid
+  warehouseId   String  @db.Uuid
+  stockId       String  @db.Uuid
+  quantity      Int
+  type          String  // IN, OUT, ADJUSTMENT, RETURN, TRANSFER_IN, TRANSFER_OUT
+  reason        String?
+  referenceType String? // PURCHASE_ORDER, WORK_ORDER, TRANSFER, MANUAL
+  referenceId   String?
+  unitCost      Float?
+  totalCost     Float?
+  notes         String?
+  createdBy     String? @db.Uuid
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  company   Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  part      InventoryPart @relation(fields: [partId], references: [id], onDelete: Cascade)
+  warehouse Warehouse     @relation(fields: [warehouseId], references: [id], onDelete: Cascade)
+  stock     Stock         @relation(fields: [stockId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+  @@index([companyId, partId])
+  @@index([companyId, warehouseId])
+  @@index([companyId, stockId])
+  @@index([companyId, type])
+  @@index([companyId, createdAt])
+  @@map("stock_movements")
+}
+
+model PurchaseOrder {
+  id              String  @id @default(uuid()) @db.Uuid
+  companyId       String  @db.Uuid
+  supplierId      String  @db.Uuid
+  orderNumber     String  @unique
+  status          PurchaseOrderStatus @default(DRAFT)
+  orderDate       DateTime?
+  expectedDeliveryDate DateTime?
+  receivedDate    DateTime?
+  subtotal        Float?
+  taxAmount       Float?
+  totalAmount     Float?
+  currency        String  @default("KES")
+  notes           String?
+  createdBy       String? @db.Uuid
+  approvedBy      String? @db.Uuid
+  approvedAt      DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  deletedAt       DateTime?
+
+  company  Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  supplier Supplier @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+  @@index([companyId, supplierId])
+  @@index([companyId, status])
+  @@index([companyId, deletedAt])
+  @@map("purchase_orders")
+}
+
+model PurchaseOrderItem {
+  id               String  @id @default(uuid()) @db.Uuid
+  companyId        String  @db.Uuid
+  purchaseOrderId  String  @db.Uuid
+  partId           String  @db.Uuid
+  quantity         Int
+  unitPrice        Float?
+  totalPrice       Float?
+  receivedQuantity Int     @default(0)
+  notes            String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  company       Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  purchaseOrder PurchaseOrder @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)
+  part          InventoryPart @relation(fields: [partId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+  @@index([purchaseOrderId])
+  @@index([companyId, partId])
+  @@map("purchase_order_items")
+}
+
+model Supplier {
+  id           String  @id @default(uuid()) @db.Uuid
+  companyId    String  @db.Uuid
+  name         String
+  contactName  String?
+  email        String?
+  phone        String?
+  phone2       String?
+  address      String?
+  city         String?
+  state        String?
+  country      String?
+  postalCode   String?
+  taxNumber    String?
+  website      String?
+  isActive     Boolean @default(true)
+  rating       Float?
+  paymentTerms Int?
+  leadTimeDays Int?
+  notes        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  deletedAt    DateTime?
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, email])
+  @@index([companyId])
+  @@index([companyId, isActive])
+  @@index([companyId, deletedAt])
+  @@map("suppliers")
+}
+
+model WarehouseTransfer {
+  id              String  @id @default(uuid()) @db.Uuid
+  companyId       String  @db.Uuid
+  fromWarehouseId String  @db.Uuid
+  toWarehouseId   String  @db.Uuid
+  transferNumber  String  @unique
+  status          WarehouseTransferStatus @default(DRAFT)
+  transferDate    DateTime?
+  receivedDate    DateTime?
+  notes           String?
+  createdBy       String? @db.Uuid
+  receivedBy      String? @db.Uuid
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  deletedAt       DateTime?
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  fromWarehouse Warehouse @relation(fields: [fromWarehouseId], references: [id], onDelete: Cascade, name: "FromWarehouse")
+  toWarehouse   Warehouse @relation(fields: [toWarehouseId], references: [id], onDelete: Cascade, name: "ToWarehouse")
+
+  @@index([companyId])
+  @@index([companyId, fromWarehouseId])
+  @@index([companyId, toWarehouseId])
+  @@index([companyId, status])
+  @@index([companyId, deletedAt])
+  @@map("warehouse_transfers")
+}
+
+model WarehouseTransferItem {
+  id               String  @id @default(uuid()) @db.Uuid
+  companyId        String  @db.Uuid
+  transferId       String  @db.Uuid
+  partId           String  @db.Uuid
+  quantity         Int
+  receivedQuantity Int     @default(0)
+  notes            String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  company  Company           @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  transfer WarehouseTransfer @relation(fields: [transferId], references: [id], onDelete: Cascade)
+  part     InventoryPart     @relation(fields: [partId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+  @@index([transferId])
+  @@index([companyId, partId])
+  @@map("warehouse_transfer_items")
+}
+
+model Tool {
+  id               String   @id @default(uuid()) @db.Uuid
+  companyId        String   @db.Uuid
+  name             String
+  code             String?
+  description      String?
+  category         String?
+  manufacturer     String?
+  serialNumber     String?
+  purchaseDate     DateTime?
+  purchasePrice    Float?
+  condition        String   @default("GOOD")
+  location         String?
+  isActive         Boolean  @default(true)
+  lastCalibratedAt DateTime?
+  nextCalibrationDue DateTime?
+  assignedTo       String?  @db.Uuid
+  notes            String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  deletedAt        DateTime?
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, code])
+  @@index([companyId])
+  @@index([companyId, isActive])
+  @@index([companyId, category])
+  @@index([companyId, deletedAt])
+  @@map("tools")
+}
+
+model InventoryAlert {
+  id             String  @id @default(uuid()) @db.Uuid
+  companyId      String  @db.Uuid
+  partId         String  @db.Uuid
+  warehouseId    String? @db.Uuid
+  alertType      String  @default("LOW_STOCK")
+  severity       String  @default("MEDIUM")
+  status         String  @default("ACTIVE")
+  currentStock   Int
+  threshold      Int
+  message        String?
+  acknowledgedAt DateTime?
+  acknowledgedBy String? @db.Uuid
+  resolvedAt     DateTime?
+  resolvedBy     String? @db.Uuid
+  notes          String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  company   Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  part      InventoryPart @relation(fields: [partId], references: [id], onDelete: Cascade)
+  warehouse Warehouse?    @relation(fields: [warehouseId], references: [id])
+
+  @@index([companyId])
+  @@index([companyId, partId])
+  @@index([companyId, warehouseId])
+  @@index([companyId, status])
+  @@index([companyId, alertType])
+  @@index([companyId, severity])
+  @@map("inventory_alerts")
+}
+
+// ============================================================================
+// INVENTORY & SPARE PARTS MANAGEMENT (Phase 12)
+// ============================================================================
+
+model Warehouse {
+  id          String   @id @default(uuid()) @db.Uuid
+  companyId   String   @db.Uuid
+  name        String
+  code        String
+  address     String?
+  city        String?
+  state       String?
+  country     String?
+  postalCode  String?
+  latitude    Float?
+  longitude   Float?
+  phone       String?
+  email       String?
+  managerId   String?  @db.Uuid
+  capacity    Int?
+  isActive    Boolean  @default(true)
+  notes       String?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+
+  company               Company             @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  manager               User?               @relation(name: "WarehouseManager", fields: [managerId], references: [id])
+  stocks                Stock[]
+  sourceTransfers       WarehouseTransfer[] @relation("SourceWarehouse")
+  destinationTransfers  WarehouseTransfer[] @relation("DestinationWarehouse")
+  sourceStockMovements  StockMovement[]     @relation(name: "MovementSourceWarehouse")
+  destinationStockMovements StockMovement[] @relation(name: "MovementDestinationWarehouse")
+  inventoryAlerts       InventoryAlert[]
+
+  @@unique([companyId, code])
+  @@index([companyId])
+  @@index([companyId, isActive])
+  @@index([companyId, deletedAt])
+  @@index([deletedAt])
+  @@map("warehouses")
+}
+
+model PartCategory {
+  id          String   @id @default(uuid()) @db.Uuid
+  companyId   String   @db.Uuid
+  name        String
+  description String?
+  parentId    String?  @db.Uuid
+  icon        String?
+  color       String?
+  sortOrder   Int      @default(0)
+  isActive    Boolean  @default(true)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+
+  company        Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  inventoryParts InventoryPart[]
+  parentCategory PartCategory?  @relation("CategoryParent", fields: [parentId], references: [id])
+  subCategories  PartCategory[] @relation("CategoryParent")
+
+  @@unique([companyId, name])
+  @@index([companyId])
+  @@index([companyId, parentId])
+  @@index([companyId, isActive])
+  @@index([companyId, deletedAt])
+  @@index([deletedAt])
+  @@map("part_categories")
+}
+
+model InventoryPart {
+  id                String   @id @default(uuid()) @db.Uuid
+  companyId         String   @db.Uuid
+  partNumber        String
+  barcode           String?
+  name              String
+  description       String?
+  categoryId        String?  @db.Uuid
+  manufacturer      String?
+  brand             String?
+  model             String?
+  compatibleVehicles Json?   @default("[]")
+  unitOfMeasure     String   @default("piece")
+  unitPrice         Float    @default(0)
+  purchasePrice     Float    @default(0)
+  sellingPrice      Float?
+  taxRate           Float    @default(0)
+  warrantyPeriod    Int?
+  minimumStock      Int      @default(0)
+  maximumStock      Int?
+  reorderLevel      Int      @default(0)
+  safetyStock       Int      @default(0)
+  isSerialized      Boolean  @default(false)
+  isTrackable       Boolean  @default(true)
+  status            PartStatus @default(ACTIVE)
+  imageUrl          String?
+  datasheetUrl      String?
+  weight            Float?
+  dimensions        Json?
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  deletedAt         DateTime?
+
+  company                Company                 @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  category               PartCategory?           @relation(fields: [categoryId], references: [id])
+  stocks                 Stock[]
+  stockMovements         StockMovement[]
+  purchaseOrderItems     PurchaseOrderItem[]
+  warehouseTransferItems WarehouseTransferItem[]
+  inventoryAlerts        InventoryAlert[]
+
+  @@unique([companyId, partNumber])
+  @@index([companyId])
+  @@index([companyId, categoryId])
+  @@index([companyId, status])
+  @@index([companyId, barcode])
+  @@index([companyId, deletedAt])
+  @@index([deletedAt])
+  @@map("inventory_parts")
+}
+
+model Stock {
+  id                String   @id @default(uuid()) @db.Uuid
+  companyId         String   @db.Uuid
+  partId            String   @db.Uuid
+  warehouseId       String   @db.Uuid
+  quantity          Int      @default(0)
+  reservedQuantity  Int      @default(0)
+  availableQuantity Int      @default(0)
+  reorderLevel      Int      @default(0)
+  lastCountedAt     DateTime?
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  deletedAt         DateTime?
+
+  company        Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  part           InventoryPart    @relation(fields: [partId], references: [id], onDelete: Cascade)
+  warehouse      Warehouse        @relation(fields: [warehouseId], references: [id], onDelete: Cascade)
+  stockMovements StockMovement[]
+  inventoryAlerts InventoryAlert[]
+
+  @@unique([partId, warehouseId])
+  @@index([companyId])
+  @@index([companyId, warehouseId])
+  @@index([companyId, partId])
+  @@index([warehouseId])
+  @@index([companyId, deletedAt])
+  @@index([deletedAt])
+  @@map("stocks")
+}
+
+model StockMovement {
+  id                     String            @id @default(uuid()) @db.Uuid
+  companyId              String            @db.Uuid
+  stockId                String            @db.Uuid
+  movementType           StockMovementType
+  quantity               Int
+  unitPrice              Float?
+  totalPrice             Float?
+  referenceId            String?           @db.Uuid
+  referenceType          String?
+  sourceWarehouseId      String?           @db.Uuid
+  destinationWarehouseId String?           @db.Uuid
+  notes                  String?
+  performedBy            String?           @db.Uuid
+
+  createdAt              DateTime          @default(now())
+  updatedAt              DateTime          @updatedAt
+  deletedAt              DateTime?
+
+  company                 Company    @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  stock                   Stock      @relation(fields: [stockId], references: [id], onDelete: Cascade)
+  performer               User?      @relation(name: "StockMovementPerformer", fields: [performedBy], references: [id])
+  sourceWarehouse         Warehouse? @relation(name: "MovementSourceWarehouse", fields: [sourceWarehouseId], references: [id])
+  destinationWarehouse    Warehouse? @relation(name: "MovementDestinationWarehouse", fields: [destinationWarehouseId], references: [id])
+
+  @@index([companyId])
+  @@index([stockId])
+  @@index([companyId, movementType])
+  @@index([companyId, createdAt])
+  @@index([companyId, deletedAt])
+  @@index([deletedAt])
+  @@map("stock_movements")
+}
+
+model PurchaseOrder {
+  id             String              @id @default(uuid()) @db.Uuid
+  companyId      String              @db.Uuid
+  orderNumber    String
+  supplierId     String?             @db.Uuid
+  status         PurchaseOrderStatus @default(DRAFT)
+  orderDate      DateTime?
+  deliveryDate   DateTime?
+  expectedDate   DateTime?
+  totalAmount    Float?
+  taxAmount      Float?
+  discountAmount Float?
+  currency       String              @default("KES")
+  notes          String?
+  approvedBy     String?             @db.Uuid
+  approvedAt     DateTime?
+  attachments    Json?
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  deletedAt      DateTime?
+
+  company         Company             @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  supplier        Supplier?           @relation(fields: [supplierId], references: [id])
+  approver        User?               @relation(name: "PurchaseOrderApprover", fields: [approvedBy], references: [id])
+  items           PurchaseOrderItem[]
+  inventoryAlerts InventoryAlert[]
+
+  @@unique([companyId, orderNumber])
+  @@index([companyId])
+  @@index([companyId, status])
+  @@index([companyId, supplierId])
+  @@index([companyId, deletedAt])
+  @@index([deletedAt])
+  @@map("purchase_orders")
+}
+
+model PurchaseOrderItem {
+  id               String   @id @default(uuid()) @db.Uuid
+  purchaseOrderId  String   @db.Uuid
+  partId           String?  @db.Uuid
+  quantity         Int
+  unitPrice        Float    @default(0)
+  totalPrice       Float?
+  receivedQuantity Int      @default(0)
+  notes            String?
+
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  purchaseOrder PurchaseOrder   @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)
+  part          InventoryPart?  @relation(fields: [partId], references: [id])
+
+  @@index([purchaseOrderId])
+  @@index([purchaseOrderId, partId])
+  @@map("purchase_order_items")
+}
+
+model Supplier {
+  id          String   @id @default(uuid()) @db.Uuid
+  companyId   String   @db.Uuid
+  name        String
+  contactName String?
+  email       String?
+  phone       String?
+  phone2      String?
+  address     String?
+  city        String?
+  state       String?
+  country     String?
+  postalCode  String?
+  taxNumber   String?
+  paymentTerms String?
+  rating      Float?
+  isPreferred Boolean  @default(false)
+  isActive    Boolean  @default(true)
+  notes       String?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+
+  company        Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  purchaseOrders PurchaseOrder[]
+
+  @@index([companyId])
+  @@index([companyId, isActive])
+  @@index([companyId, isPreferred])
+  @@index([companyId, deletedAt])
+  @@index([deletedAt])
+  @@map("suppliers")
+}
+
+model WarehouseTransfer {
+  id                     String                  @id @default(uuid()) @db.Uuid
+  companyId              String                  @db.Uuid
+  transferNumber         String
+  sourceWarehouseId      String                  @db.Uuid
+  destinationWarehouseId String                  @db.Uuid
+  status                 WarehouseTransferStatus @default(DRAFT)
+  requestedBy            String?                 @db.Uuid
+  approvedBy             String?                 @db.Uuid
+  approvedAt             DateTime?
+  receivedBy             String?                 @db.Uuid
+  receivedAt             DateTime?
+  notes                  String?
+  totalItems             Int?
+
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+  deletedAt              DateTime?
+
+  company              Company                 @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  sourceWarehouse      Warehouse               @relation("SourceWarehouse", fields: [sourceWarehouseId], references: [id], onDelete: Cascade)
+  destinationWarehouse Warehouse               @relation("DestinationWarehouse", fields: [destinationWarehouseId], references: [id], onDelete: Cascade)
+  requester            User?                   @relation(name: "TransferRequester", fields: [requestedBy], references: [id])
+  approver             User?                   @relation(name: "TransferApprover", fields: [approvedBy], references: [id])
+  receiver             User?                   @relation(name: "TransferReceiver", fields: [receivedBy], references: [id])
+  items                WarehouseTransferItem[]
+
+  @@unique([companyId, transferNumber])
+  @@index([companyId])
+  @@index([companyId, status])
+  @@index([companyId, sourceWarehouseId])
+  @@index([companyId, destinationWarehouseId])
+  @@index([companyId, deletedAt])
+  @@index([deletedAt])
+  @@map("warehouse_transfers")
+}
+
+model WarehouseTransferItem {
+  id               String   @id @default(uuid()) @db.Uuid
+  transferId       String   @db.Uuid
+  partId           String?  @db.Uuid
+  quantity         Int
+  receivedQuantity Int      @default(0)
+  notes            String?
+
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  transfer WarehouseTransfer @relation(fields: [transferId], references: [id], onDelete: Cascade)
+  part     InventoryPart?    @relation(fields: [partId], references: [id])
+
+  @@index([transferId])
+  @@index([transferId, partId])
+  @@map("warehouse_transfer_items")
+}
+
+model Tool {
+  id                  String        @id @default(uuid()) @db.Uuid
+  companyId           String        @db.Uuid
+  toolNumber          String
+  name                String
+  description         String?
+  serialNumber        String?
+  model               String?
+  manufacturer        String?
+  purchaseDate        DateTime?
+  purchasePrice       Float?
+  assignedMechanicId  String?       @db.Uuid
+  lastCalibrationDate DateTime?
+  nextCalibrationDate DateTime?
+  status              ToolStatus    @default(AVAILABLE)
+  condition           ToolCondition @default(EXCELLENT)
+  location            String?
+  imageUrl            String?
+  notes               String?
+
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  deletedAt           DateTime?
+
+  company  Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  mechanic Mechanic? @relation(fields: [assignedMechanicId], references: [id])
+
+  @@unique([companyId, toolNumber])
+  @@index([companyId])
+  @@index([companyId, status])
+  @@index([companyId, assignedMechanicId])
+  @@index([companyId, deletedAt])
+  @@index([deletedAt])
+  @@map("tools")
+}
+
+model InventoryAlert {
+  id              String   @id @default(uuid()) @db.Uuid
+  companyId       String   @db.Uuid
+  alertType       String
+  title           String
+  message         String
+  partId          String?  @db.Uuid
+  warehouseId     String?  @db.Uuid
+  purchaseOrderId String?  @db.Uuid
+  isRead          Boolean  @default(false)
+  isResolved      Boolean  @default(false)
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  deletedAt       DateTime?
+
+  company       Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  warehouse     Warehouse?    @relation(fields: [warehouseId], references: [id])
+  part          InventoryPart? @relation(fields: [partId], references: [id])
+  purchaseOrder PurchaseOrder? @relation(fields: [purchaseOrderId], references: [id])
+
+  @@index([companyId])
+  @@index([companyId, isRead])
+  @@index([companyId, isResolved])
+  @@index([companyId, alertType])
+  @@index([companyId, deletedAt])
+  @@index([deletedAt])
+  @@map("inventory_alerts")
+}

@@ -1,0 +1,4 @@
+import DriverForm from '../components/DriverForm';
+export default function NewDriverPage() {
+  return <DriverForm />;
+}

@@ -1,0 +1,36 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# Development Dockerfile — Non-multi-stage, hot-reload enabled
+# ═══════════════════════════════════════════════════════════════════════════════
+
+FROM node:20-alpine
+
+RUN apk add --no-cache libc6-compat openssl curl
+
+WORKDIR /app
+
+# Copy package files first for cache layer
+COPY package.json package-lock.json* ./
+
+# Install ALL dependencies (including dev)
+RUN --mount=type=cache,target=/root/.npm \
+    npm ci
+
+# Copy Prisma schema and generate client
+COPY prisma ./prisma/
+RUN npx prisma generate
+
+# Source code is mounted via volume at runtime — see docker-compose.yml
+# We only copy the source here as a fallback for non-volume runs
+COPY . .
+
+ENV NODE_ENV=development
+ENV PORT=3000
+ENV HOSTNAME=0.0.0.0
+ENV NEXT_TELEMETRY_DISABLED=1
+
+EXPOSE 3000
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+    CMD curl -f http://localhost:3000/api/health || exit 1
+
+CMD ["npm", "run", "dev"]

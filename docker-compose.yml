@@ -1,0 +1,267 @@
+version: "3.8"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Fleet Management SaaS — Docker Compose
+# Usage:
+#   Dev:     docker-compose --profile dev up -d
+#   Prod:    docker-compose --profile prod up -d
+#   Stop:    docker-compose --profile dev|prod down
+# ═══════════════════════════════════════════════════════════════════════════════
+
+services:
+  # ════════════════════════════════════════════════════════════════════════════
+  # APP (Next.js)
+  # ════════════════════════════════════════════════════════════════════════════
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    profiles:
+      - prod
+    container_name: fleet_app
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env.production
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=${DATABASE_URL:-postgresql://postgres:postgres@db:5432/fleet_management?schema=public}
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379}
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    networks:
+      - fleet-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3000/api/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  app-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    profiles:
+      - dev
+    container_name: fleet_app_dev
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env.development
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/fleet_management?schema=public
+      - REDIS_URL=redis://redis:6379
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.next
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    networks:
+      - fleet-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3000/api/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  # ════════════════════════════════════════════════════════════════════════════
+  # DATABASE (PostgreSQL)
+  # ════════════════════════════════════════════════════════════════════════════
+  db:
+    image: postgres:16-alpine
+    container_name: fleet_db
+    profiles:
+      - dev
+      - prod
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-fleet_management}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - fleet-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-fleet_management}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # ════════════════════════════════════════════════════════════════════════════
+  # REDIS (Caching, Sessions, Socket.IO adapter)
+  # ════════════════════════════════════════════════════════════════════════════
+  redis:
+    image: redis:7-alpine
+    container_name: fleet_redis
+    profiles:
+      - dev
+      - prod
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - fleet-network
+    restart: unless-stopped
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+
+  # ════════════════════════════════════════════════════════════════════════════
+  # NGINX (Reverse Proxy / Load Balancer)
+  # ════════════════════════════════════════════════════════════════════════════
+  nginx:
+    image: nginx:alpine
+    container_name: fleet_nginx
+    profiles:
+      - prod
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - nginx_cache:/var/cache/nginx
+    depends_on:
+      - app
+    networks:
+      - fleet-network
+    restart: unless-stopped
+
+  nginx-dev:
+    image: nginx:alpine
+    container_name: fleet_nginx_dev
+    profiles:
+      - dev
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.dev.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - app-dev
+    networks:
+      - fleet-network
+
+  # ════════════════════════════════════════════════════════════════════════════
+  # MAILHOG (Email testing — dev only)
+  # ════════════════════════════════════════════════════════════════════════════
+  mailhog:
+    image: mailhog/mailhog
+    container_name: fleet_mailhog
+    profiles:
+      - dev
+    ports:
+      - "1025:1025"   # SMTP port
+      - "8025:8025"   # Web UI
+    networks:
+      - fleet-network
+
+  # ════════════════════════════════════════════════════════════════════════════
+  # MONITORING — Prometheus
+  # ════════════════════════════════════════════════════════════════════════════
+  prometheus:
+    image: prom/prometheus:v2.55
+    container_name: fleet_prometheus
+    profiles:
+      - prod
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./monitoring/prometheus/alerts.yml:/etc/prometheus/alerts.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=15d'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    networks:
+      - fleet-network
+    restart: unless-stopped
+
+  # ════════════════════════════════════════════════════════════════════════════
+  # MONITORING — Grafana
+  # ════════════════════════════════════════════════════════════════════════════
+  grafana:
+    image: grafana/grafana:10.4
+    container_name: fleet_grafana
+    profiles:
+      - prod
+    ports:
+      - "3001:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
+      - GF_USERS_ALLOW_SIGN_UP=false
+    networks:
+      - fleet-network
+    restart: unless-stopped
+    depends_on:
+      - prometheus
+      - loki
+
+  # ════════════════════════════════════════════════════════════════════════════
+  # MONITORING — Loki (Log aggregation)
+  # ════════════════════════════════════════════════════════════════════════════
+  loki:
+    image: grafana/loki:2.9
+    container_name: fleet_loki
+    profiles:
+      - prod
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./monitoring/loki/loki-config.yml:/etc/loki/local-config.yaml:ro
+      - loki_data:/loki
+    command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      - fleet-network
+    restart: unless-stopped
+
+  # ════════════════════════════════════════════════════════════════════════════
+  # MONITORING — Promtail (Log shipper to Loki)
+  # ════════════════════════════════════════════════════════════════════════════
+  promtail:
+    image: grafana/promtail:2.9
+    container_name: fleet_promtail
+    profiles:
+      - prod
+    volumes:
+      - ./monitoring/promtail/promtail-config.yml:/etc/promtail/config.yml:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    command: -config.file=/etc/promtail/config.yml
+    networks:
+      - fleet-network
+    restart: unless-stopped
+    depends_on:
+      - loki
+
+volumes:
+  postgres_data:
+  redis_data:
+  nginx_cache:
+  grafana_data:
+  prometheus_data:
+  loki_data:
+
+networks:
+  fleet-network:
+    driver: bridge

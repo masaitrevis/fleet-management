@@ -3418,7 +3418,7 @@ model Inspection {
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 
-  templateId String?
+  templateId String? @db.Uuid
   template   InspectionTemplate? @relation(fields: [templateId], references: [id])
   company    Company             @relation(fields: [companyId], references: [id], onDelete: Cascade)
   vehicle    Vehicle             @relation(fields: [vehicleId], references: [id], onDelete: Cascade)

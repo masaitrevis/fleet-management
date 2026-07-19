@@ -1,5 +1,6 @@
 import { ThemeProvider } from '@/lib/theme';
 import SkipLink from '@/components/SkipLink';
+import './globals.css';
 
 export const metadata = {
   title: 'Fleet Management SaaS',

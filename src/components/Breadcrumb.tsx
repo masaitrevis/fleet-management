@@ -27,15 +27,15 @@ export default function Breadcrumb({ items, className }: BreadcrumbProps) {
           return (
             <li key={index} className="flex items-center">
               {index > 0 && (
-                <ChevronRight className="h-4 w-4 text-gray-400 mx-1 flex-shrink-0" />
+                <ChevronRight className="h-4 w-4 text-gray-400 dark:text-slate-500 mx-1 flex-shrink-0" />
               )}
               {isLast || !item.href ? (
                 <span
                   className={cn(
                     'flex items-center gap-1 text-sm',
                     isLast
-                      ? 'font-medium text-gray-900
-                      : 'text-gray-500
+                      ? 'font-medium text-gray-900 dark:text-white'
+                      : 'text-gray-500 dark:text-slate-400'
                   )}
                   aria-current={isLast ? 'page' : undefined}
                 >
@@ -45,7 +45,7 @@ export default function Breadcrumb({ items, className }: BreadcrumbProps) {
               ) : (
                 <Link
                   href={item.href}
-                  className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-900 transition-colors"
+                  className="flex items-center gap-1 text-sm text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white transition-colors"
                 >
                   {Icon && <Icon className="h-4 w-4" />}
                   {item.label}

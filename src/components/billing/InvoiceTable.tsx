@@ -18,12 +18,12 @@ interface InvoiceTableProps {
 }
 
 const statusColors: Record<string, string> = {
-  PAID: "bg-green-100 text-green-700
-  DRAFT: "bg-gray-100 text-gray-700
-  SENT: "bg-blue-100 text-blue-700
-  OVERDUE: "bg-red-100 text-red-700
-  PARTIAL: "bg-amber-100 text-amber-700
-  CANCELLED: "bg-gray-100 text-gray-500
+  PAID: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
+  DRAFT: "bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400",
+  SENT: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
+  OVERDUE: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
+  PARTIAL: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
+  CANCELLED: "bg-gray-100 text-gray-500 dark:bg-gray-900/30 dark:text-gray-500",
 };
 
 export function InvoiceTable({ invoices }: InvoiceTableProps) {
@@ -34,7 +34,7 @@ export function InvoiceTable({ invoices }: InvoiceTableProps) {
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-sm text-left">
-        <thead className="bg-gray-50 text-xs uppercase text-gray-500
+        <thead className="bg-gray-50 text-xs uppercase text-gray-500 dark:bg-gray-800 dark:text-gray-400">
           <tr>
             <th className="px-4 py-3">Invoice #</th>
             <th className="px-4 py-3">Date</th>
@@ -46,8 +46,8 @@ export function InvoiceTable({ invoices }: InvoiceTableProps) {
         </thead>
         <tbody>
           {invoices.map((inv) => (
-            <tr key={inv.id} className="border-b
-              <td className="px-4 py-3 font-medium text-gray-900
+            <tr key={inv.id} className="border-b dark:border-gray-700">
+              <td className="px-4 py-3 font-medium text-gray-900 dark:text-white">{inv.invoiceNumber}</td>
               <td className="px-4 py-3">{new Date(inv.issueDate).toLocaleDateString()}</td>
               <td className="px-4 py-3">{new Date(inv.dueDate).toLocaleDateString()}</td>
               <td className="px-4 py-3">{inv.currency} {inv.total.toLocaleString()}</td>
@@ -58,8 +58,8 @@ export function InvoiceTable({ invoices }: InvoiceTableProps) {
               </td>
               <td className="px-4 py-3 text-right">
                 <div className="flex items-center justify-end gap-2">
-                  <button className="rounded p-1 hover:bg-gray-100 className="h-4 w-4" /></button>
-                  <button className="rounded p-1 hover:bg-gray-100 className="h-4 w-4" /></button>
+                  <button className="rounded p-1 hover:bg-gray-100 dark:hover:bg-gray-700"><Eye className="h-4 w-4" /></button>
+                  <button className="rounded p-1 hover:bg-gray-100 dark:hover:bg-gray-700"><Download className="h-4 w-4" /></button>
                 </div>
               </td>
             </tr>

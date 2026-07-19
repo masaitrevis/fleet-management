@@ -37,16 +37,16 @@ export default function UsagePage() {
   return (
     <div className="mx-auto max-w-4xl px-4 py-8">
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900 Dashboard</h1>
-        <button onClick={fetchUsage} className="flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Usage Dashboard</h1>
+        <button onClick={fetchUsage} className="flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700">
           <RefreshCw className="h-4 w-4" /> Refresh
         </button>
       </div>
 
-      <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm
+      <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
         <div className="mb-4 flex items-center gap-2">
-          <BarChart3 className="h-5 w-5 text-gray-500 />
-          <h2 className="text-lg font-semibold text-gray-900 Period Usage</h2>
+          <BarChart3 className="h-5 w-5 text-gray-500 dark:text-gray-400" />
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Current Period Usage</h2>
         </div>
 
         <div className="space-y-5">

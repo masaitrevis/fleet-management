@@ -78,12 +78,12 @@ export default function TenantDetailPage() {
           <KpiCard title="Active Trips" value={usage?.activeTripCount ?? 0} icon={Route} />
         </div>
 
-        <div className="bg-white rounded-lg border border-gray-200 p-5">
-          <h3 className="text-sm font-semibold text-gray-900 mb-3">Subscription</h3>
+        <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-5">
+          <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">Subscription</h3>
           {tenant.subscriptions && tenant.subscriptions.length > 0 ? (
             <div className="space-y-2">
-              <p className="text-sm text-gray-700 {tenant.subscriptions[0].plan.name}</p>
-              <p className="text-sm text-gray-700 {tenant.subscriptions[0].status}</p>
+              <p className="text-sm text-gray-700 dark:text-gray-300">Plan: {tenant.subscriptions[0].plan.name}</p>
+              <p className="text-sm text-gray-700 dark:text-gray-300">Status: {tenant.subscriptions[0].status}</p>
             </div>
           ) : (
             <p className="text-sm text-gray-500">No active subscription</p>

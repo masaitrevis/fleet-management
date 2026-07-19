@@ -54,7 +54,7 @@ export default function AuditLogsPage() {
       <div className="p-6 space-y-4">
         <div className="flex items-center justify-between">
           <p className="text-sm text-gray-500">{total} total events</p>
-          <button onClick={handleExport} className="flex items-center gap-2 px-3 py-1.5 text-sm border border-gray-200 rounded-md hover:bg-gray-50
+          <button onClick={handleExport} className="flex items-center gap-2 px-3 py-1.5 text-sm border border-gray-200 dark:border-slate-600 rounded-md hover:bg-gray-50 dark:hover:bg-slate-800">
             <Download className="h-4 w-4" /> Export CSV
           </button>
         </div>
@@ -64,14 +64,14 @@ export default function AuditLogsPage() {
             {[...Array(5)].map((_, i) => <div key={i} className="h-16 bg-gray-200 rounded" />)}
           </div>
         ) : (
-          <div className="bg-white rounded-lg border border-gray-200 p-5">
+          <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-5">
             <AuditTimeline events={events} />
           </div>
         )}
 
         <div className="flex items-center justify-center gap-2">
           <button disabled={page <= 1} onClick={() => setPage(page - 1)} className="px-3 py-1.5 text-sm border rounded-md disabled:opacity-50">Previous</button>
-          <span className="text-sm text-gray-700 {page}</span>
+          <span className="text-sm text-gray-700 dark:text-gray-300">Page {page}</span>
           <button disabled={events.length < limit} onClick={() => setPage(page + 1)} className="px-3 py-1.5 text-sm border rounded-md disabled:opacity-50">Next</button>
         </div>
       </div>

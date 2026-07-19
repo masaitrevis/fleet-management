@@ -78,15 +78,15 @@ export default function SecurityPage() {
             { label: 'Rate Limit Hits', value: data?.rateLimitViolations24h ?? 0 },
             { label: 'Blocked IPs', value: data?.blockedIPs ?? 0 },
           ].map((stat) => (
-            <div key={stat.label} className="bg-white rounded-lg border border-gray-200 p-4 text-center">
-              <p className="text-2xl font-bold text-gray-900
-              <p className="text-xs text-gray-500 mt-1">{stat.label}</p>
+            <div key={stat.label} className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-4 text-center">
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">{stat.value}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{stat.label}</p>
             </div>
           ))}
         </div>
 
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-gray-900 Events</h3>
+          <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Recent Events</h3>
           <button onClick={handleBlockIP} className="px-3 py-1.5 text-sm bg-red-600 text-white rounded-md hover:bg-red-700">
             Block IP
           </button>

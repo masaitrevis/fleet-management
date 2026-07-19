@@ -19,20 +19,20 @@ interface ConfirmDialogProps {
 const variantConfig = {
   danger: {
     icon: AlertTriangle,
-    iconBg: 'bg-red-50
-    iconColor: 'text-red-500
+    iconBg: 'bg-red-50 dark:bg-red-900/20',
+    iconColor: 'text-red-500 dark:text-red-400',
     confirmBtn: 'bg-red-600 hover:bg-red-700 focus:ring-red-500',
   },
   warning: {
     icon: AlertTriangle,
-    iconBg: 'bg-amber-50
-    iconColor: 'text-amber-500
+    iconBg: 'bg-amber-50 dark:bg-amber-900/20',
+    iconColor: 'text-amber-500 dark:text-amber-400',
     confirmBtn: 'bg-amber-600 hover:bg-amber-700 focus:ring-amber-500',
   },
   info: {
     icon: AlertTriangle,
-    iconBg: 'bg-primary-50
-    iconColor: 'text-primary-500
+    iconBg: 'bg-primary-50 dark:bg-primary-900/20',
+    iconColor: 'text-primary-500 dark:text-primary-400',
     confirmBtn: 'bg-primary-600 hover:bg-primary-700 focus:ring-primary-500',
   },
 };
@@ -90,7 +90,7 @@ export default function ConfirmDialog({
         aria-modal="true"
         aria-labelledby="confirm-dialog-title"
         aria-describedby="confirm-dialog-message"
-        className="w-full max-w-md bg-white rounded-xl shadow-xl border border-gray-200 overflow-hidden"
+        className="w-full max-w-md bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-gray-200 dark:border-slate-700 overflow-hidden"
       >
         <div className="p-6">
           <div className="flex items-start gap-4">
@@ -106,14 +106,14 @@ export default function ConfirmDialog({
               <div className="flex items-center justify-between mb-1">
                 <h3
                   id="confirm-dialog-title"
-                  className="text-base font-semibold text-gray-900
+                  className="text-base font-semibold text-gray-900 dark:text-white"
                 >
                   {title}
                 </h3>
                 <button
                   type="button"
                   onClick={onCancel}
-                  className="text-gray-400 hover:text-gray-600 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-400 rounded-md p-1"
+                  className="text-gray-400 dark:text-slate-400 hover:text-gray-600 dark:hover:text-slate-200 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-400 rounded-md p-1"
                   aria-label="Close dialog"
                 >
                   <X className="h-4 w-4" />
@@ -121,7 +121,7 @@ export default function ConfirmDialog({
               </div>
               <p
                 id="confirm-dialog-message"
-                className="text-sm text-gray-500
+                className="text-sm text-gray-500 dark:text-slate-400"
               >
                 {message}
               </p>
@@ -129,11 +129,11 @@ export default function ConfirmDialog({
           </div>
         </div>
 
-        <div className="flex items-center justify-end gap-3 px-6 py-4 bg-gray-50 border-t border-gray-200
+        <div className="flex items-center justify-end gap-3 px-6 py-4 bg-gray-50 dark:bg-slate-900 border-t border-gray-200 dark:border-slate-700">
           <button
             type="button"
             onClick={onCancel}
-            className="px-4 py-2 rounded-lg border border-gray-200 text-gray-700 text-sm font-medium hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2
+            className="px-4 py-2 rounded-lg border border-gray-200 dark:border-slate-600 text-gray-700 dark:text-slate-300 text-sm font-medium hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 dark:focus:ring-offset-slate-800"
           >
             {cancelLabel}
           </button>
@@ -144,7 +144,7 @@ export default function ConfirmDialog({
               release();
             }}
             className={cn(
-              'px-4 py-2 rounded-lg text-white text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2
+              'px-4 py-2 rounded-lg text-white text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-slate-800',
               config.confirmBtn
             )}
           >

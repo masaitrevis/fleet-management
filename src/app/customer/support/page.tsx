@@ -23,20 +23,20 @@ export default function CustomerSupportPage() {
 
   return (
     <div className="mx-auto max-w-xl space-y-4">
-      <h1 className="text-2xl font-bold text-gray-900 Center</h1>
+      <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Support Center</h1>
       {submitted && (
-        <div className="rounded-lg bg-green-50 p-3 text-sm text-green-700
+        <div className="rounded-lg bg-green-50 p-3 text-sm text-green-700 dark:bg-green-900/20 dark:text-green-400">
           Support request submitted successfully!
         </div>
       )}
-      <form onSubmit={handleSubmit} className="space-y-4 rounded-xl border border-gray-200 bg-white p-4
+      <form onSubmit={handleSubmit} className="space-y-4 rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
         <div>
-          <label className="block text-sm font-medium text-gray-700
-          <input value={subject} onChange={(e) => setSubject(e.target.value)} required className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm />
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Subject</label>
+          <input value={subject} onChange={(e) => setSubject(e.target.value)} required className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700
-          <textarea value={message} onChange={(e) => setMessage(e.target.value)} required rows={4} className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm />
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Message</label>
+          <textarea value={message} onChange={(e) => setMessage(e.target.value)} required rows={4} className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
         </div>
         <button type="submit" className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
           <Send className="h-4 w-4" /> Submit Request

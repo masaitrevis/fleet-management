@@ -55,7 +55,7 @@ export default function JobsPage() {
           <p className="text-sm text-gray-500">{total} total jobs</p>
           <div className="flex items-center gap-2">
             <button disabled={page <= 1} onClick={() => setPage(page - 1)} className="px-3 py-1.5 text-sm border rounded-md disabled:opacity-50">Previous</button>
-            <span className="text-sm text-gray-700 {page}</span>
+            <span className="text-sm text-gray-700 dark:text-gray-300">Page {page}</span>
             <button disabled={jobs.length < limit} onClick={() => setPage(page + 1)} className="px-3 py-1.5 text-sm border rounded-md disabled:opacity-50">Next</button>
           </div>
         </div>

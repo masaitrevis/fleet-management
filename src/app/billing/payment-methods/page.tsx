@@ -28,7 +28,7 @@ export default function PaymentMethodsPage() {
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
-      <h1 className="mb-6 text-2xl font-bold text-gray-900 Methods</h1>
+      <h1 className="mb-6 text-2xl font-bold text-gray-900 dark:text-white">Payment Methods</h1>
 
       <div className="space-y-4">
         {methods.map((method) => (
@@ -36,23 +36,23 @@ export default function PaymentMethodsPage() {
             key={method.id}
             className={`flex items-center justify-between rounded-xl border p-4 ${
               method.isDefault
-                ? "border-blue-200 bg-blue-50/50
-                : "border-gray-200 bg-white
+                ? "border-blue-200 bg-blue-50/50 dark:border-blue-900/30 dark:bg-blue-900/20"
+                : "border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800"
             }`}
           >
             <div className="flex items-center gap-4">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-100
-                <CreditCard className="h-5 w-5 text-gray-600 />
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-700">
+                <CreditCard className="h-5 w-5 text-gray-600 dark:text-gray-300" />
               </div>
               <div>
-                <p className="font-medium text-gray-900
+                <p className="font-medium text-gray-900 dark:text-white">
                   {method.brand} ···· {method.last4}
                 </p>
                 {method.type === "card" && (
-                  <p className="text-sm text-gray-500 {method.expiryMonth}/{method.expiryYear}</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Exp {method.expiryMonth}/{method.expiryYear}</p>
                 )}
                 {method.isDefault && (
-                  <span className="mt-1 inline-block rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700
+                  <span className="mt-1 inline-block rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
                     Default
                   </span>
                 )}
@@ -62,14 +62,14 @@ export default function PaymentMethodsPage() {
               {!method.isDefault && (
                 <button
                   onClick={() => setDefault(method.id)}
-                  className="rounded-lg border border-gray-200 px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50
+                  className="rounded-lg border border-gray-200 px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700"
                 >
                   Set Default
                 </button>
               )}
               <button
                 onClick={() => removeMethod(method.id)}
-                className="rounded-lg p-2 text-gray-400 hover:bg-red-50 hover:text-red-600
+                className="rounded-lg p-2 text-gray-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20"
               >
                 <Trash2 className="h-4 w-4" />
               </button>
@@ -77,7 +77,7 @@ export default function PaymentMethodsPage() {
           </div>
         ))}
 
-        <button className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-gray-300 p-4 text-sm font-medium text-gray-600 hover:border-gray-400 hover:bg-gray-50
+        <button className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-gray-300 p-4 text-sm font-medium text-gray-600 hover:border-gray-400 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:border-gray-600 dark:hover:bg-gray-800">
           <Plus className="h-4 w-4" /> Add Payment Method
         </button>
       </div>

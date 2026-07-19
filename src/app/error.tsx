@@ -19,12 +19,12 @@ export default function RootError({
   return (
     <ErrorBoundary
       fallback={
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-          <div className="max-w-md w-full bg-white rounded-xl border border-gray-200 p-8 shadow-lg">
-            <h2 className="text-lg font-semibold text-gray-900 text-center mb-2">
+        <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-slate-900 p-4">
+          <div className="max-w-md w-full bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-8 shadow-lg">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white text-center mb-2">
               Page Error
             </h2>
-            <p className="text-sm text-gray-500 text-center mb-6">
+            <p className="text-sm text-gray-500 dark:text-slate-400 text-center mb-6">
               {error.message || 'An unexpected error occurred while loading this page.'}
             </p>
             <button
@@ -37,12 +37,12 @@ export default function RootError({
         </div>
       }
     >
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-        <div className="max-w-md w-full bg-white rounded-xl border border-gray-200 p-8 shadow-lg">
-          <h2 className="text-lg font-semibold text-gray-900 text-center mb-2">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-slate-900 p-4">
+        <div className="max-w-md w-full bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-8 shadow-lg">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white text-center mb-2">
             Page Error
           </h2>
-          <p className="text-sm text-gray-500 text-center mb-6">
+          <p className="text-sm text-gray-500 dark:text-slate-400 text-center mb-6">
             {error.message || 'An unexpected error occurred while loading this page.'}
           </p>
           <button

@@ -25,7 +25,7 @@ export default function LoadingSpinner({
       aria-label={label}
       className={cn('inline-flex items-center justify-center', className)}
     >
-      <Loader2 className={cn('animate-spin text-primary-600 sizeMap[size])} />
+      <Loader2 className={cn('animate-spin text-primary-600 dark:text-primary-400', sizeMap[size])} />
       <VisuallyHidden>{label}</VisuallyHidden>
     </div>
   );

@@ -18,13 +18,13 @@ export default function CustomerShipmentsPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-bold text-gray-900 Shipments</h1>
+      <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Active Shipments</h1>
       {shipments.length === 0 && <p className="text-gray-500">No active shipments</p>}
       {shipments.map((s: any) => (
-        <div key={s.id} className="rounded-xl border border-gray-200 bg-white p-4
+        <div key={s.id} className="rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
           <div className="flex items-start justify-between">
             <div>
-              <p className="font-semibold text-gray-900 || s.title || "Shipment"}</p>
+              <p className="font-semibold text-gray-900 dark:text-white">{s.tripNumber || s.title || "Shipment"}</p>
               <div className="mt-2 space-y-1 text-sm text-gray-500">
                 <p className="flex items-center gap-1"><Truck className="h-3.5 w-3.5" /> {s.vehicle?.registrationNumber} · {s.vehicle?.make} {s.vehicle?.model}</p>
                 <p className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5" /> Driver: {s.driver?.firstName} {s.driver?.lastName}</p>

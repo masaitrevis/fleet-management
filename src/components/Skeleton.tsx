@@ -26,7 +26,7 @@ export default function Skeleton({
         <div
           key={i}
           className={cn(
-            'animate-pulse bg-gray-200 relative overflow-hidden',
+            'animate-pulse bg-gray-200 dark:bg-slate-700 relative overflow-hidden',
             circle && 'rounded-full',
             !circle && 'rounded-md',
             className
@@ -49,7 +49,7 @@ export default function Skeleton({
 // Skeleton variants for common use cases
 export function SkeletonCard({ className }: { className?: string }) {
   return (
-    <div className={cn('rounded-lg border border-gray-200 bg-white p-4', className)}>
+    <div className={cn('rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4', className)}>
       <div className="flex items-center gap-3 mb-4">
         <Skeleton circle width={40} height={40} />
         <div className="flex-1 space-y-2">
@@ -68,15 +68,15 @@ export function SkeletonCard({ className }: { className?: string }) {
 
 export function SkeletonTable({ rows = 5, columns = 4 }: { rows?: number; columns?: number }) {
   return (
-    <div className="rounded-lg border border-gray-200 bg-white overflow-hidden">
-      <div className="border-b border-gray-200 bg-gray-50 p-4">
+    <div className="rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 overflow-hidden">
+      <div className="border-b border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-900 p-4">
         <div className="grid gap-4" style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}>
           {Array.from({ length: columns }).map((_, i) => (
             <Skeleton key={i} height={16} />
           ))}
         </div>
       </div>
-      <div className="divide-y divide-gray-200
+      <div className="divide-y divide-gray-200 dark:divide-slate-700">
         {Array.from({ length: rows }).map((_, rowIdx) => (
           <div key={rowIdx} className="p-4">
             <div className="grid gap-4" style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}>

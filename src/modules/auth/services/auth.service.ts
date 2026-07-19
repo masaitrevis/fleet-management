@@ -76,7 +76,7 @@ export class AuthService {
     // Audit log
     await authRepository.createAuditLog({
       userId: user.id,
-      action: 'COMPANY_REGISTERED',
+      action: 'CREATE',
       entityType: 'Company',
       entityId: company.id,
       description: `Company ${company.name} registered by ${user.email}`,
@@ -206,7 +206,7 @@ export class AuthService {
     await authRepository.createAuditLog({
       companyId,
       userId: user.id,
-      action: 'USER_LOGIN',
+      action: 'LOGIN',
       entityType: 'User',
       entityId: user.id,
       description: `User ${user.email} logged in`,
@@ -256,7 +256,7 @@ export class AuthService {
     if (userId) {
       await authRepository.createAuditLog({
         userId,
-        action: 'USER_LOGOUT',
+        action: 'LOGOUT',
         entityType: 'User',
         entityId: userId,
         description: 'User logged out',
@@ -271,7 +271,7 @@ export class AuthService {
 
     await authRepository.createAuditLog({
       userId,
-      action: 'USER_LOGOUT_ALL',
+      action: 'LOGOUT',
       entityType: 'User',
       entityId: userId,
       description: 'User logged out from all devices',
@@ -343,7 +343,7 @@ export class AuthService {
 
     await authRepository.createAuditLog({
       userId: user.id,
-      action: 'PASSWORD_RESET_REQUESTED',
+      action: 'UPDATE',
       entityType: 'User',
       entityId: user.id,
       description: 'Password reset requested',
@@ -382,7 +382,7 @@ export class AuthService {
 
     await authRepository.createAuditLog({
       userId,
-      action: 'PASSWORD_CHANGED',
+      action: 'UPDATE',
       entityType: 'User',
       entityId: userId,
       description: 'Password changed by user',

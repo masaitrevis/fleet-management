@@ -31,44 +31,44 @@ const statusIcons: Record<string, React.ReactNode> = {
 
 export default function QueueMonitor({ jobs, onRetry, onCancel }: QueueMonitorProps) {
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 overflow-hidden">
+    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
-          <thead className="bg-gray-50 dark:bg-slate-700/50">
+          <thead className="bg-gray-50
             <tr>
-              <th className="px-4 py-3 text-left font-medium text-gray-700 dark:text-gray-300">Status</th>
-              <th className="px-4 py-3 text-left font-medium text-gray-700 dark:text-gray-300">Type</th>
-              <th className="px-4 py-3 text-left font-medium text-gray-700 dark:text-gray-300">Queue</th>
-              <th className="px-4 py-3 text-left font-medium text-gray-700 dark:text-gray-300">Attempts</th>
-              <th className="px-4 py-3 text-left font-medium text-gray-700 dark:text-gray-300">Created</th>
-              <th className="px-4 py-3 text-left font-medium text-gray-700 dark:text-gray-300">Actions</th>
+              <th className="px-4 py-3 text-left font-medium text-gray-700
+              <th className="px-4 py-3 text-left font-medium text-gray-700
+              <th className="px-4 py-3 text-left font-medium text-gray-700
+              <th className="px-4 py-3 text-left font-medium text-gray-700
+              <th className="px-4 py-3 text-left font-medium text-gray-700
+              <th className="px-4 py-3 text-left font-medium text-gray-700
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100 dark:divide-slate-700">
+          <tbody className="divide-y divide-gray-100
             {jobs.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-gray-500 dark:text-gray-400">No jobs found</td>
+                <td colSpan={6} className="px-4 py-8 text-center text-gray-500 jobs found</td>
               </tr>
             ) : (
               jobs.map((job) => (
-                <tr key={job.id} className="hover:bg-gray-50 dark:hover:bg-slate-700/50">
+                <tr key={job.id} className="hover:bg-gray-50
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
                       {statusIcons[job.status] || <Pause className="h-4 w-4" />}
-                      <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{job.status}</span>
+                      <span className="text-xs font-medium text-gray-700
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-gray-900 dark:text-gray-100">{job.type}</td>
-                  <td className="px-4 py-3 text-gray-500 dark:text-gray-400">{job.queue}</td>
-                  <td className="px-4 py-3 text-gray-500 dark:text-gray-400">{job.attempts}/{job.maxAttempts}</td>
-                  <td className="px-4 py-3 text-gray-500 dark:text-gray-400 text-xs">{new Date(job.createdAt).toLocaleString()}</td>
+                  <td className="px-4 py-3 text-gray-900
+                  <td className="px-4 py-3 text-gray-500
+                  <td className="px-4 py-3 text-gray-500
+                  <td className="px-4 py-3 text-gray-500 text-xs">{new Date(job.createdAt).toLocaleString()}</td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
                       {job.status === 'FAILED' && onRetry && (
-                        <button onClick={() => onRetry(job.id)} className="text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400">Retry</button>
+                        <button onClick={() => onRetry(job.id)} className="text-xs text-blue-600 hover:text-blue-800
                       )}
                       {(job.status === 'PENDING' || job.status === 'PROCESSING' || job.status === 'RETRYING') && onCancel && (
-                        <button onClick={() => onCancel(job.id)} className="text-xs text-red-600 hover:text-red-800 dark:text-red-400">Cancel</button>
+                        <button onClick={() => onCancel(job.id)} className="text-xs text-red-600 hover:text-red-800
                       )}
                     </div>
                   </td>

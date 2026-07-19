@@ -52,22 +52,22 @@ export default function SystemConfigPage() {
           </div>
         ) : (
           Object.entries(grouped).map(([category, items]) => (
-            <div key={category} className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-5">
-              <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3 capitalize">{category}</h3>
+            <div key={category} className="bg-white rounded-lg border border-gray-200 p-5">
+              <h3 className="text-sm font-semibold text-gray-900 mb-3 capitalize">{category}</h3>
               <div className="space-y-3">
                 {items.map((item) => (
                   <div key={item.id} className="flex items-center gap-3">
                     <div className="flex-1">
-                      <label className="text-xs font-medium text-gray-700 dark:text-gray-300">{item.key}</label>
+                      <label className="text-xs font-medium text-gray-700
                       {item.description && <p className="text-xs text-gray-500">{item.description}</p>}
                     </div>
                     <input
                       type={item.isEncrypted ? 'password' : 'text'}
                       defaultValue={item.value}
                       onBlur={(e) => handleUpdate(item.key, e.target.value)}
-                      className="w-64 px-3 py-1.5 text-sm border border-gray-200 dark:border-slate-600 rounded-md bg-gray-50 dark:bg-slate-700 text-gray-900 dark:text-white"
+                      className="w-64 px-3 py-1.5 text-sm border border-gray-200 rounded-md bg-gray-50 text-gray-900
                     />
-                    <button className="p-1.5 rounded hover:bg-gray-100 dark:hover:bg-slate-700">
+                    <button className="p-1.5 rounded hover:bg-gray-100
                       <Save className="h-4 w-4 text-gray-500" />
                     </button>
                   </div>

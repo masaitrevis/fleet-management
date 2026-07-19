@@ -76,19 +76,19 @@ export default function TenantsPage() {
     { key: 'vehicles', header: 'Vehicles', render: (t: Tenant) => t._count?.vehicles ?? 0 },
     { key: 'actions', header: 'Actions', render: (t: Tenant) => (
       <div className="flex items-center gap-2">
-        <button onClick={() => router.push(`/admin/tenants/${t.id}`)} className="p-1 rounded hover:bg-gray-100 dark:hover:bg-slate-700">
+        <button onClick={() => router.push(`/admin/tenants/${t.id}`)} className="p-1 rounded hover:bg-gray-100
           <Eye className="h-4 w-4 text-gray-500" />
         </button>
         {t.status !== 'SUSPENDED' ? (
-          <button onClick={() => handleSuspend(t.id)} className="p-1 rounded hover:bg-gray-100 dark:hover:bg-slate-700">
+          <button onClick={() => handleSuspend(t.id)} className="p-1 rounded hover:bg-gray-100
             <PauseCircle className="h-4 w-4 text-amber-500" />
           </button>
         ) : (
-          <button onClick={() => handleActivate(t.id)} className="p-1 rounded hover:bg-gray-100 dark:hover:bg-slate-700">
+          <button onClick={() => handleActivate(t.id)} className="p-1 rounded hover:bg-gray-100
             <PlayCircle className="h-4 w-4 text-emerald-500" />
           </button>
         )}
-        <button onClick={() => handleDelete(t.id)} className="p-1 rounded hover:bg-gray-100 dark:hover:bg-slate-700">
+        <button onClick={() => handleDelete(t.id)} className="p-1 rounded hover:bg-gray-100
           <Trash2 className="h-4 w-4 text-red-500" />
         </button>
       </div>
@@ -107,7 +107,7 @@ export default function TenantsPage() {
               placeholder="Search tenants..."
               value={search}
               onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-              className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 dark:border-slate-600 rounded-md bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-md bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
         </div>
@@ -123,15 +123,15 @@ export default function TenantsPage() {
             <button
               disabled={page <= 1}
               onClick={() => setPage(page - 1)}
-              className="px-3 py-1.5 text-sm border border-gray-200 dark:border-slate-600 rounded-md disabled:opacity-50"
+              className="px-3 py-1.5 text-sm border border-gray-200 rounded-md disabled:opacity-50"
             >
               Previous
             </button>
-            <span className="text-sm text-gray-700 dark:text-gray-300">Page {page}</span>
+            <span className="text-sm text-gray-700 {page}</span>
             <button
               disabled={tenants.length < limit}
               onClick={() => setPage(page + 1)}
-              className="px-3 py-1.5 text-sm border border-gray-200 dark:border-slate-600 rounded-md disabled:opacity-50"
+              className="px-3 py-1.5 text-sm border border-gray-200 rounded-md disabled:opacity-50"
             >
               Next
             </button>

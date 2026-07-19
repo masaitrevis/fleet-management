@@ -29,17 +29,17 @@ export default function CustomerDashboardPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
+      <h1 className="text-2xl font-bold text-gray-900
 
       <div className="grid gap-4 md:grid-cols-3">
         {stats.map((s) => (
-          <div key={s.label} className="rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
+          <div key={s.label} className="rounded-xl border border-gray-200 bg-white p-4
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">{s.label}</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">{s.value}</p>
+                <p className="text-sm text-gray-500
+                <p className="text-2xl font-bold text-gray-900
               </div>
-              <div className={`rounded-lg p-2 ${s.bg} dark:opacity-80`}>
+              <div className={`rounded-lg p-2 ${s.bg}
                 <s.icon className={`h-5 w-5 ${s.color}`} />
               </div>
             </div>
@@ -47,18 +47,18 @@ export default function CustomerDashboardPage() {
         ))}
       </div>
 
-      <div className="rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
-        <div className="border-b border-gray-200 px-4 py-3 dark:border-gray-700">
-          <h2 className="font-semibold text-gray-900 dark:text-white">Recent Shipments</h2>
+      <div className="rounded-xl border border-gray-200 bg-white
+        <div className="border-b border-gray-200 px-4 py-3
+          <h2 className="font-semibold text-gray-900 Shipments</h2>
         </div>
-        <div className="divide-y dark:divide-gray-700">
+        <div className="divide-y
           {shipments.length === 0 && (
             <p className="px-4 py-6 text-center text-sm text-gray-500">No active shipments</p>
           )}
           {shipments.map((s: any) => (
             <div key={s.id} className="flex items-center justify-between px-4 py-3">
               <div>
-                <p className="font-medium text-gray-900 dark:text-white">{s.tripNumber || s.title || "Shipment"}</p>
+                <p className="font-medium text-gray-900 || s.title || "Shipment"}</p>
                 <p className="text-sm text-gray-500">{s.vehicle?.registrationNumber} · {s.status}</p>
               </div>
               <div className="flex items-center gap-2">

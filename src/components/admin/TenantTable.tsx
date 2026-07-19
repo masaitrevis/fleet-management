@@ -75,8 +75,8 @@ export default function TenantTable({ tenants, loading, onView, onSuspend, onDel
             </button>
           )}
           {confirmDelete === t.id && (
-            <div className="absolute right-0 mt-8 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg shadow-lg p-3 z-10">
-              <p className="text-xs text-gray-600 dark:text-gray-300 mb-2">Confirm delete?</p>
+            <div className="absolute right-0 mt-8 bg-white border border-gray-200 rounded-lg shadow-lg p-3 z-10">
+              <p className="text-xs text-gray-600 mb-2">Confirm delete?</p>
               <div className="flex gap-2">
                 <button onClick={() => { onDelete?.(t.id); setConfirmDelete(null); }} className="px-2 py-1 text-xs bg-red-600 text-white rounded">Delete</button>
                 <button onClick={() => setConfirmDelete(null)} className="px-2 py-1 text-xs bg-gray-200 text-gray-700 rounded">Cancel</button>

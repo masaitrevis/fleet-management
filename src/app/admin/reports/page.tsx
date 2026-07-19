@@ -73,22 +73,22 @@ export default function ReportsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-bold text-gray-900 dark:text-white">Reports</h2>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Generate and export platform reports</p>
+        <h2 className="text-xl font-bold text-gray-900
+        <p className="text-sm text-gray-500 mt-1">Generate and export platform reports</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         {reports.map((report) => (
-          <div key={report.id} className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-5 flex flex-col">
+          <div key={report.id} className="bg-white rounded-lg border border-gray-200 p-5 flex flex-col">
             <div className="flex items-start justify-between">
               <div className={`p-2.5 rounded-lg ${report.iconColor}`}>
                 <report.icon className="w-6 h-6" />
               </div>
               <span className="text-xs text-gray-400">Last: {report.lastGenerated}</span>
             </div>
-            <h3 className="text-base font-semibold text-gray-900 dark:text-white mt-3">{report.title}</h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 flex-1">{report.description}</p>
-            <div className="flex items-center gap-2 mt-4 pt-4 border-t border-gray-100 dark:border-slate-700">
+            <h3 className="text-base font-semibold text-gray-900 mt-3">{report.title}</h3>
+            <p className="text-sm text-gray-500 mt-1 flex-1">{report.description}</p>
+            <div className="flex items-center gap-2 mt-4 pt-4 border-t border-gray-100
               {report.formats.map((fmt) => (
                 <button
                   key={fmt}

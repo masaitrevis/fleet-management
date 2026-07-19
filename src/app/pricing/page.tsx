@@ -48,8 +48,8 @@ export default function PricingPage() {
   return (
     <div className="mx-auto max-w-6xl px-4 py-12">
       <div className="mb-12 text-center">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Simple, Transparent Pricing</h1>
-        <p className="mt-2 text-gray-600 dark:text-gray-400">Choose the plan that fits your fleet. No hidden fees.</p>
+        <h1 className="text-3xl font-bold text-gray-900 Transparent Pricing</h1>
+        <p className="mt-2 text-gray-600 the plan that fits your fleet. No hidden fees.</p>
       </div>
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {plans.map((plan) => (
@@ -73,13 +73,13 @@ export default function PricingPage() {
           </>
         )}
       </div>
-      <div className="mt-12 rounded-2xl border border-gray-200 bg-gray-50 p-8 text-center dark:border-gray-700 dark:bg-gray-800">
-        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30">
-          <CheckCircle className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+      <div className="mt-12 rounded-2xl border border-gray-200 bg-gray-50 p-8 text-center
+        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-blue-100
+          <CheckCircle className="h-6 w-6 text-blue-600 />
         </div>
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Need a custom plan?</h3>
-        <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Contact us for enterprise pricing tailored to your fleet size.</p>
-        <button className="mt-4 rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600">
+        <h3 className="text-lg font-semibold text-gray-900 a custom plan?</h3>
+        <p className="mt-1 text-sm text-gray-600 us for enterprise pricing tailored to your fleet size.</p>
+        <button className="mt-4 rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800
           Contact Sales
         </button>
       </div>

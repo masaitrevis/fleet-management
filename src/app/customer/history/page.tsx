@@ -17,13 +17,13 @@ export default function CustomerHistoryPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Delivery History</h1>
+      <h1 className="text-2xl font-bold text-gray-900 History</h1>
       {history.length === 0 && <p className="text-gray-500">No delivery history</p>}
       {history.map((h: any) => (
-        <div key={h.id} className="rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
+        <div key={h.id} className="rounded-xl border border-gray-200 bg-white p-4
           <div className="flex items-center justify-between">
             <div>
-              <p className="font-semibold text-gray-900 dark:text-white">{h.tripNumber || h.title || "Delivery"}</p>
+              <p className="font-semibold text-gray-900 || h.title || "Delivery"}</p>
               <p className="text-sm text-gray-500">{h.vehicle?.registrationNumber} · {new Date(h.actualEndTime || h.updatedAt).toLocaleDateString()}</p>
             </div>
             {h.status === "COMPLETED" ? (

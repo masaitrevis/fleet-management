@@ -58,10 +58,10 @@ export default function UsersPage() {
     )},
     { key: 'actions', header: 'Actions', render: (u: PlatformUser) => (
       <div className="flex items-center gap-2">
-        <button className="p-1 rounded hover:bg-gray-100 dark:hover:bg-slate-700">
+        <button className="p-1 rounded hover:bg-gray-100
           <Edit2 className="h-4 w-4 text-gray-500" />
         </button>
-        <button onClick={() => handleDelete(u.id)} className="p-1 rounded hover:bg-gray-100 dark:hover:bg-slate-700">
+        <button onClick={() => handleDelete(u.id)} className="p-1 rounded hover:bg-gray-100
           <Trash2 className="h-4 w-4 text-red-500" />
         </button>
       </div>
@@ -89,7 +89,7 @@ export default function UsersPage() {
           <p className="text-sm text-gray-500">{total} total users</p>
           <div className="flex items-center gap-2">
             <button disabled={page <= 1} onClick={() => setPage(page - 1)} className="px-3 py-1.5 text-sm border rounded-md disabled:opacity-50">Previous</button>
-            <span className="text-sm text-gray-700 dark:text-gray-300">Page {page}</span>
+            <span className="text-sm text-gray-700 {page}</span>
             <button disabled={users.length < limit} onClick={() => setPage(page + 1)} className="px-3 py-1.5 text-sm border rounded-md disabled:opacity-50">Next</button>
           </div>
         </div>
@@ -111,7 +111,7 @@ function UserForm({ onCreated }: { onCreated: () => void }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-5 space-y-3">
+    <form onSubmit={handleSubmit} className="bg-white rounded-lg border border-gray-200 p-5 space-y-3">
       <div className="grid grid-cols-2 gap-3">
         <input placeholder="First Name" className="px-3 py-2 border rounded-md text-sm" value={form.firstName} onChange={(e) => setForm({ ...form, firstName: e.target.value })} required />
         <input placeholder="Last Name" className="px-3 py-2 border rounded-md text-sm" value={form.lastName} onChange={(e) => setForm({ ...form, lastName: e.target.value })} required />

@@ -58,22 +58,22 @@ export default function AdminDashboardPage() {
         <AdminHeader title="Platform Dashboard" subtitle="Overview of all tenants and system health" />
         <div className="p-6 space-y-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <KpiCard title="Total Companies" value={metrics?.totalCompanies ?? 0} icon={Building2} loading={loading} iconColor="bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400" />
-            <KpiCard title="Active Users" value={metrics?.activeUsers ?? 0} icon={Users} loading={loading} iconColor="bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400" />
-            <KpiCard title="Total Vehicles" value={metrics?.totalVehicles ?? 0} icon={Car} loading={loading} iconColor="bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400" />
-            <KpiCard title="Active Trips" value={metrics?.activeTrips ?? 0} icon={Route} loading={loading} iconColor="bg-amber-50 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400" />
+            <KpiCard title="Total Companies" value={metrics?.totalCompanies ?? 0} icon={Building2} loading={loading} iconColor="bg-blue-50 text-blue-600 />
+            <KpiCard title="Active Users" value={metrics?.activeUsers ?? 0} icon={Users} loading={loading} iconColor="bg-emerald-50 text-emerald-600 />
+            <KpiCard title="Total Vehicles" value={metrics?.totalVehicles ?? 0} icon={Car} loading={loading} iconColor="bg-indigo-50 text-indigo-600 />
+            <KpiCard title="Active Trips" value={metrics?.activeTrips ?? 0} icon={Route} loading={loading} iconColor="bg-amber-50 text-amber-600 />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <KpiCard title="Storage Used" value={`${Math.round((metrics?.storageUsed ?? 0) / 1024 / 1024 / 1024)} GB`} icon={HardDrive} loading={loading} iconColor="bg-purple-50 text-purple-600 dark:bg-purple-900/20 dark:text-purple-400" />
-            <KpiCard title="API Requests" value={metrics?.apiRequests ?? 0} icon={Activity} loading={loading} iconColor="bg-cyan-50 text-cyan-600 dark:bg-cyan-900/20 dark:text-cyan-400" />
-            <KpiCard title="Monthly Revenue" value={`$${metrics?.monthlyRevenue ?? 0}`} icon={DollarSign} loading={loading} iconColor="bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-400" />
-            <KpiCard title="Failed Jobs" value={metrics?.failedJobs ?? 0} icon={AlertTriangle} loading={loading} iconColor="bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400" change={metrics?.failedJobs && metrics.failedJobs > 0 ? -metrics.failedJobs : 0} />
+            <KpiCard title="Storage Used" value={`${Math.round((metrics?.storageUsed ?? 0) / 1024 / 1024 / 1024)} GB`} icon={HardDrive} loading={loading} iconColor="bg-purple-50 text-purple-600 />
+            <KpiCard title="API Requests" value={metrics?.apiRequests ?? 0} icon={Activity} loading={loading} iconColor="bg-cyan-50 text-cyan-600 />
+            <KpiCard title="Monthly Revenue" value={`$${metrics?.monthlyRevenue ?? 0}`} icon={DollarSign} loading={loading} iconColor="bg-green-50 text-green-600 />
+            <KpiCard title="Failed Jobs" value={metrics?.failedJobs ?? 0} icon={AlertTriangle} loading={loading} iconColor="bg-red-50 text-red-600 change={metrics?.failedJobs && metrics.failedJobs > 0 ? -metrics.failedJobs : 0} />
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2 bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-5">
-              <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">System Health</h3>
+            <div className="lg:col-span-2 bg-white rounded-lg border border-gray-200 p-5">
+              <h3 className="text-sm font-semibold text-gray-900 mb-4">System Health</h3>
               <div className="space-y-2">
                 {metrics?.systemHealth && (
                   <>
@@ -94,8 +94,8 @@ export default function AdminDashboardPage() {
               </div>
             </div>
 
-            <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-5">
-              <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">Server Status</h3>
+            <div className="bg-white rounded-lg border border-gray-200 p-5">
+              <h3 className="text-sm font-semibold text-gray-900 mb-4">Server Status</h3>
               {loading ? (
                 <div className="flex items-center justify-center py-8">
                   <div className="text-center space-y-3">
@@ -108,8 +108,8 @@ export default function AdminDashboardPage() {
                 <div className="flex items-center justify-center py-8">
                   <div className="text-center">
                     <Server className="h-12 w-12 text-emerald-500 mx-auto" />
-                    <p className="mt-2 text-lg font-semibold text-emerald-600 dark:text-emerald-400">All Systems Operational</p>
-                    <p className="text-xs text-gray-500 dark:text-slate-400">Last checked: {new Date().toLocaleTimeString()}</p>
+                    <p className="mt-2 text-lg font-semibold text-emerald-600 Systems Operational</p>
+                    <p className="text-xs text-gray-500 checked: {new Date().toLocaleTimeString()}</p>
                   </div>
                 </div>
               )}

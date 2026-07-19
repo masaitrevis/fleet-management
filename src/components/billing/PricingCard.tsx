@@ -30,8 +30,8 @@ export function PricingCard({
     <div
       className={`relative rounded-2xl border p-6 shadow-sm transition-all hover:shadow-md ${
         isPopular
-          ? "border-blue-500 bg-blue-50/50 dark:border-blue-400 dark:bg-blue-900/20"
-          : "border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800"
+          ? "border-blue-500 bg-blue-50/50
+          : "border-gray-200 bg-white
       }`}
     >
       {isPopular && (
@@ -40,14 +40,14 @@ export function PricingCard({
         </div>
       )}
       <div className="mb-4">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{name}</h3>
-        {description && <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{description}</p>}
+        <h3 className="text-lg font-semibold text-gray-900
+        {description && <p className="mt-1 text-sm text-gray-500
       </div>
       <div className="mb-6">
-        <span className="text-3xl font-bold text-gray-900 dark:text-white">
+        <span className="text-3xl font-bold text-gray-900
           {currency} {price.toLocaleString()}
         </span>
-        <span className="text-sm text-gray-500 dark:text-gray-400">/{interval}</span>
+        <span className="text-sm text-gray-500
       </div>
       <ul className="mb-6 space-y-3">
         {features.map((feature, i) => (
@@ -57,7 +57,7 @@ export function PricingCard({
             ) : (
               <X className="mt-0.5 h-4 w-4 shrink-0 text-gray-400" />
             )}
-            <span className={`text-sm ${feature.included ? "text-gray-700 dark:text-gray-300" : "text-gray-400 dark:text-gray-500"}`}>
+            <span className={`text-sm ${feature.included ? "text-gray-700 : "text-gray-400
               {feature.text}
             </span>
           </li>
@@ -68,10 +68,10 @@ export function PricingCard({
         disabled={isCurrent}
         className={`w-full rounded-lg px-4 py-2.5 text-sm font-medium transition-colors ${
           isCurrent
-            ? "cursor-not-allowed bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400"
+            ? "cursor-not-allowed bg-gray-100 text-gray-500
             : isPopular
             ? "bg-blue-600 text-white hover:bg-blue-700"
-            : "bg-gray-900 text-white hover:bg-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600"
+            : "bg-gray-900 text-white hover:bg-gray-800
         }`}
       >
         {isCurrent ? "Current Plan" : buttonText}

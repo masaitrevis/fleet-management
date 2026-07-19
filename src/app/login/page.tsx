@@ -25,10 +25,11 @@ export default function LoginPage() {
       });
 
       const data = await res.json();
+      console.log('Login response:', data);
       if (data.success) {
         router.push('/dashboard');
       } else {
-        setError(data.message || 'Invalid credentials');
+        setError(data.error?.message || data.message || 'Invalid credentials');
       }
     } catch {
       setError('Something went wrong');

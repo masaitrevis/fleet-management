@@ -1,3 +1,8 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Force dark text on inputs to prevent system dark mode override */
+input, textarea, select {
+  color: #111827;
+}

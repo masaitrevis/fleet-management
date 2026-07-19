@@ -1,111 +1,143 @@
-const { PrismaClient } = require('@prisma/client');
-const bcrypt = require('bcryptjs');
+const { PrismaClient, CompanyStatus, UserStatus } = require('@prisma/client');
+const bcrypt = require('bcrypt');
 
 const prisma = new PrismaClient();
+const SALT_ROUNDS = 12;
 
 async function main() {
   console.log('Seeding database...');
 
-  const company = await prisma.company.upsert({
-    where: { id: 'demo-company-001' },
-    update: {},
-    create: {
-      id: 'demo-company-001',
-      name: 'Bright Fleet Demo',
-      slug: 'bright-fleet-demo',
-      status: 'ACTIVE',
-      subscriptionPlan: 'PROFESSIONAL',
-      subscriptionStatus: 'ACTIVE',
-      maxUsers: 50,
-      maxVehicles: 100,
-      maxBranches: 10,
-      settings: {
-        timezone: 'Africa/Nairobi',
-        language: 'en',
-        currency: 'KES',
-        dateFormat: 'DD/MM/YYYY',
-        timeFormat: '24h',
-        measurementUnit: 'metric',
-        fuelUnit: 'liters',
-        distanceUnit: 'km',
+  const hashedPassword = await bcrypt.hash('admin123', SALT_ROUNDS);
+
+  const result = await prisma.$transaction(async (tx) => {
+    // Create company
+    const company = await tx.company.create({
+      data: {
+        name: 'Bright Fleet Demo',
+        slug: 'bright-fleet-demo',
+        email: 'admin@brightfleet.com',
+        status: CompanyStatus.ACTIVE,
       },
-    },
-  });
+    });
+    console.log('Company:', company.name);
 
-  console.log('Company:', company.name);
+    // Create owner role
+    const role = await tx.role.create({
+      data: {
+        name: 'Company Owner',
+        description: 'Full access to company resources',
+        companyId: company.id,
+        permissions: [
+          'company:read', 'company:update',
+          'user:create', 'user:read', 'user:update', 'user:delete',
+          'vehicle:create', 'vehicle:read', 'vehicle:update', 'vehicle:delete',
+          'driver:create', 'driver:read', 'driver:update', 'driver:delete',
+          'trip:create', 'trip:read', 'trip:update', 'trip:delete',
+          'fuel:create', 'fuel:read', 'fuel:update', 'fuel:delete',
+          'maintenance:create', 'maintenance:read', 'maintenance:update', 'maintenance:delete',
+          'expense:create', 'expense:read', 'expense:update', 'expense:delete',
+          'invoice:create', 'invoice:read', 'invoice:update', 'invoice:delete',
+          'report:read', 'settings:read', 'settings:update',
+        ],
+      },
+    });
+    console.log('Role:', role.name);
 
-  const hashedPassword = await bcrypt.hash('admin123', 10);
-  const user = await prisma.user.upsert({
-    where: { id: 'demo-admin-001' },
-    update: {},
-    create: {
-      id: 'demo-admin-001',
-      email: 'admin@brightfleet.com',
-      password: hashedPassword,
-      firstName: 'Admin',
-      lastName: 'User',
-      role: 'ADMIN',
-      status: 'ACTIVE',
-      companyId: company.id,
-      permissions: ['company:read', 'company:update', 'vehicle:read', 'vehicle:write'],
-    },
-  });
+    // Create user (email verified, active)
+    const user = await tx.user.create({
+      data: {
+        email: 'admin@brightfleet.com',
+        passwordHash: hashedPassword,
+        firstName: 'Admin',
+        lastName: 'User',
+        status: UserStatus.ACTIVE,
+        emailVerifiedAt: new Date(), // Required for login
+      },
+    });
+    console.log('User:', user.email);
 
-  console.log('User:', user.email);
+    // Link user to company
+    await tx.companyUser.create({
+      data: {
+        userId: user.id,
+        companyId: company.id,
+        isOwner: true,
+      },
+    });
+    console.log('CompanyUser created');
 
-  await prisma.branch.upsert({
-    where: { id: 'branch-001' },
-    update: {},
-    create: {
-      id: 'branch-001',
-      name: 'Nairobi HQ',
-      code: 'NBO-HQ',
-      type: 'HEADQUARTERS',
-      status: 'ACTIVE',
-      companyId: company.id,
-      address: '123 Mombasa Road, Nairobi',
-      city: 'Nairobi',
-      country: 'Kenya',
-    },
-  });
+    // Assign role
+    await tx.userRole.create({
+      data: {
+        userId: user.id,
+        roleId: role.id,
+        companyId: company.id,
+      },
+    });
+    console.log('UserRole created');
 
-  await prisma.branch.upsert({
-    where: { id: 'branch-002' },
-    update: {},
-    create: {
-      id: 'branch-002',
-      name: 'Mombasa Depot',
-      code: 'MBA-DP',
-      type: 'DEPOT',
-      status: 'ACTIVE',
-      companyId: company.id,
-      address: '456 Port Road, Mombasa',
-      city: 'Mombasa',
-      country: 'Kenya',
-    },
-  });
+    // Create branches
+    await tx.branch.createMany({
+      data: [
+        {
+          companyId: company.id,
+          name: 'Nairobi HQ',
+          address: '123 Mombasa Road, Nairobi',
+          city: 'Nairobi',
+          country: 'Kenya',
+        },
+        {
+          companyId: company.id,
+          name: 'Mombasa Depot',
+          address: '456 Port Road, Mombasa',
+          city: 'Mombasa',
+          country: 'Kenya',
+        },
+      ],
+    });
+    console.log('Branches created');
 
-  await prisma.vehicle.upsert({
-    where: { id: 'vehicle-001' },
-    update: {},
-    create: {
-      id: 'vehicle-001',
-      registrationNumber: 'KCA 123A',
-      make: 'Toyota',
-      model: 'Hilux',
-      year: 2023,
-      type: 'PICKUP',
-      status: 'ACTIVE',
-      companyId: company.id,
-      branchId: 'branch-001',
-      fuelType: 'DIESEL',
-      currentOdometer: 15000,
-    },
+    // Create a vehicle category
+    const category = await tx.vehicleCategory.create({
+      data: {
+        companyId: company.id,
+        name: 'Light Trucks',
+        description: 'Light commercial vehicles',
+        color: '#3b82f6',
+      },
+    });
+    console.log('Category:', category.name);
+
+    // Create a vehicle
+    await tx.vehicle.create({
+      data: {
+        companyId: company.id,
+        categoryId: category.id,
+        registrationNumber: 'KCA 123A',
+        plateNumber: 'KCA 123A',
+        make: 'Toyota',
+        model: 'Hilux',
+        year: 2023,
+        fuelType: 'DIESEL',
+        currentOdometer: 15000,
+        odometer: 15000,
+        status: 'ACTIVE',
+        availability: 'AVAILABLE',
+      },
+    });
+    console.log('Vehicle created');
+
+    return { company, user };
   });
 
   console.log('Seed done!');
+  console.log('Login with: admin@brightfleet.com / admin123');
+  console.log('Company ID:', result.company.id);
 }
 
 main()
-  .catch(console.error)
+  .catch((e) => {
+    console.error(e);
+    process.exit(1);
+  })
   .finally(() => prisma.$disconnect());
